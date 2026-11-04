@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; media-src 'self' blob:;">
+  <meta name="description" content="GeoClearance NYSC - Fast, tamper-proof location and dynamic biometric clearance system for Nigerian National Youth Service Corps members.">
+  <title>GeoClearance NYSC — Next-Gen Biometric & Location Clearance</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top App Navigation & Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="nysc-seal" id="app-seal" title="National Youth Service Corps">NYSC</div>
+        <div class="brand-text">
+          <h1>GeoClearance <span class="badge-tag">Protov3</span></h1>
+          <p>Decentralized High-Speed Clearance & Attendance Verification</p>
+        </div>
+      </div>
+
+      <!-- Live Role Switcher -->
+      <nav class="role-tabs" aria-label="System Roles">
+        <button type="button" class="tab-btn active" id="tab-corper-btn" data-view="view-corper">
+          <span>📱 Corps Member</span>
+        </button>
+        <button type="button" class="tab-btn" id="tab-secretariat-btn" data-view="view-secretariat">
+          <span>🖥️ Secretariat Screen</span>
+        </button>
+        <button type="button" class="tab-btn" id="tab-inspector-btn" data-view="view-inspector">
+          <span>👮 Inspector Terminal</span>
+        </button>
+        <button type="button" class="tab-btn gold-mode" id="tab-dual-btn" data-view="view-dual">
+          <span>⚡ Live Dual Demo</span>
+        </button>
+      </nav>
+
+      <div class="system-status">
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span id="system-time-display">08:42:15 WAT</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="main-wrapper">
+
+    <!-- ==========================================
+         VIEW 1: CORPS MEMBER MOBILE VIEW
+         ========================================== -->
+    <section class="role-view active-view" id="view-corper">
+      <div class="mobile-app-container">
+        
+        <!-- Phone Mockup Container -->
+        <div class="phone-mockup" id="corper-phone-frame">
+          <div class="phone-notch">
+            <div class="camera-hole"></div>
+          </div>
+
+          <div class="phone-screen">
+            <!-- Corper Profile Card -->
+            <div class="corper-id-card">
+              <div class="corper-avatar-box">
+                <img src="assets/corper_passport.jpg" alt="Corps Member Passport" class="corper-photo" id="corper-photo-img">
+                <div class="liveness-check-badge" title="Facial Liveness Verified">✓</div>
+              </div>
+              <div class="corper-meta">
+                <h3 id="corper-name-display">ADELEKE OLUWASEUN</h3>
+                <span class="state-code-pill" id="corper-statecode-display">LA/24B/4819</span>
+                <p class="corper-subtext">Lagos State Min. of Science & Tech</p>
+                <p class="corper-subtext">Ikeja LGA • Batch B Stream II</p>
+              </div>
+            </div>
+
+            <!-- Verification Stepper Status Cards -->
+            <div class="verification-stepper">
+              <!-- Step 1: Geofence Verification -->
+              <div class="step-card verified" id="step-geofence-card">
+                <div class="step-info">
+                  <div class="step-icon">📍</div>
+                  <div class="step-titles">
+                    <h4>Geofence: Ikeja Secretariat</h4>
+                    <p id="geofence-status-text">18 meters from Secretariat • In Zone</p>
+                  </div>
+                </div>
+                <span class="step-badge" id="geofence-badge">VERIFIED</span>
+              </div>
+
+              <!-- Step 2: Anti-Mock GPS Guard -->
+              <div class="step-card verified" id="step-mockgps-card">
+                <div class="step-info">
+                  <div class="step-icon">🛡️</div>
+                  <div class="step-titles">
+                    <h4>Device Location Integrity</h4>
+                    <p id="mockgps-status-text">Hardware GPS locked (Mock: None)</p>
+                  </div>
+                </div>
+                <span class="step-badge" id="mockgps-badge">SECURE</span>
+              </div>
+
+              <!-- Step 3: Biometric Liveness -->
+              <div class="step-card verified" id="step-liveness-card">
+                <div class="step-info">
+                  <div class="step-icon">👤</div>
+                  <div class="step-titles">
+                    <h4>Facial Liveness Verification</h4>
+                    <p id="liveness-status-text">Passive match 98.4% • Active</p>
+                  </div>
+                </div>
+                <button type="button" class="btn-ctrl" id="btn-reverify-selfie" style="padding: 0.35rem 0.6rem;">Verify</button>
+              </div>
+            </div>
+
+            <!-- Route A: Dynamic Clearance Pass -->
+            <div class="qr-pass-card" id="dynamic-pass-container">
+              <div class="pass-header">
+                <span class="pass-title">MONTHLY CLEARANCE PASS</span>
+                <span style="font-size: 0.72rem; color: #a7f3d0; font-weight: 700;">NOV 2026</span>
+              </div>
+
+              <!-- Canvas QR with Watermark -->
+              <div class="qr-canvas-wrapper">
+                <canvas id="corper-qr-canvas" width="174" height="174"></canvas>
+                <div class="qr-watermark">NYSC</div>
+              </div>
+
+              <!-- Countdown Ring -->
+              <div class="timer-container">
+                <svg class="progress-ring">
+                  <circle class="progress-ring__circle" stroke-dasharray="62.8" stroke-dashoffset="0" cx="12" cy="12" r="10" />
+                </svg>
+                <span id="qr-refresh-timer">Pass refreshes in 28s</span>
+              </div>
+
+              <div class="token-hash" id="token-signature-hash">
+                SIG: 0x4f8e...92cb (Ed25519)
+              </div>
+            </div>
+
+            <!-- Route B Alternative Action -->
+            <div class="walkthrough-scan-box">
+              <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                Walking past the LGI Master Screen?
+              </p>
+              <button type="button" class="btn-gold" id="btn-scan-station-screen">
+                📷 Scan Secretariat Screen
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testing Simulation Dock -->
+        <aside class="simulation-dock">
+          <div class="dock-card">
+            <h3>🎛️ Location & Anti-Cheat Simulator</h3>
+            <p>Test how GeoClearance defends against GPS spoofing and ghost check-ins.</p>
+            <div class="control-buttons-grid">
+              <button type="button" class="btn-ctrl active-ctrl" id="sim-loc-secretariat">
+                <strong>📍 At Secretariat</strong>
+                <span>18m (Inside Zone)</span>
+              </button>
+              <button type="button" class="btn-ctrl" id="sim-loc-home">
+                <strong>🏠 At Home (Lagos)</strong>
+                <span>14.2 km (Rejected)</span>
+              </button>
+              <button type="button" class="btn-ctrl danger-ctrl" id="sim-loc-fakegps">
+                <strong>⚠️ Fake GPS App</strong>
+                <span>Spoofed Coordinate</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="dock-card">
+            <h3>⚡ Why This Defeats All Cheats</h3>
+            <ul style="font-size: 0.8rem; color: var(--text-secondary); margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem;">
+              <li><strong>Zero WhatsApp Screenshot Trading:</strong> The QR pass regenerates with dynamic HMAC tokens every 30 seconds.</li>
+              <li><strong>Zero Mock GPS:</strong> Native Android/iOS mock location flags drop the clearance pass instantly.</li>
+              <li><strong>Decentralized Biometrics:</strong> Uses the phone's front camera for instant face match, eliminating the queue for 1 dirty fingerprint reader.</li>
+            </ul>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         VIEW 2: SECRETARIAT MASTER DISPLAY (Route B)
+         ========================================== -->
+    <section class="role-view" id="view-secretariat">
+      <div class="secretariat-display-container">
+        
+        <!-- Rotating Station QR Section -->
+        <div class="display-qr-section">
+          <div class="nysc-seal" style="width: 52px; height: 52px; font-size: 1.2rem;">NYSC</div>
+          <div>
+            <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #ffffff;">IKEJA LGA SECRETARIAT</h2>
+            <p style="color: var(--nysc-gold-light); font-size: 0.9rem; font-weight: 600;">STATION #IKJ-HALL-01 • CDS / CLEARANCE TERMINAL</p>
+          </div>
+
+          <div class="master-qr-box">
+            <canvas id="station-master-qr-canvas" width="256" height="256"></canvas>
+          </div>
+
+          <div style="width: 100%; max-width: 320px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary);">
+              <span>Rotating Station Challenge Token</span>
+              <span id="station-token-counter">Refresh in 7s</span>
+            </div>
+            <div class="rotating-token-bar">
+              <div class="rotating-token-progress" id="station-progress-bar"></div>
+            </div>
+          </div>
+
+          <p style="font-size: 0.8rem; color: var(--text-muted); max-width: 360px;">
+            Corpers: Open GeoClearance app on your phone, tap "Scan Secretariat Screen", and point at this screen as you walk past.
+          </p>
+        </div>
+
+        <!-- Real-Time Telemetry Dashboard -->
+        <div class="display-telemetry-section">
+          <h3 style="font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 1rem; color: #ffffff;">
+            📊 Live Clearance Telemetry
+          </h3>
+
+          <div class="telemetry-grid">
+            <div class="metric-card">
+              <div class="metric-title">Cleared Today</div>
+              <div class="metric-value highlight-green" id="stat-cleared-count">1,894</div>
+              <div class="metric-sub">Out of 3,240 Enrolled (58.4%)</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-title">Queue Speed</div>
+              <div class="metric-value highlight-gold" id="stat-throughput-rate">48/min</div>
+              <div class="metric-sub">Avg 0.7 sec per Corper</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-title">Projected Completion</div>
+              <div class="metric-value" style="font-size: 1.5rem;">28 mins</div>
+              <div class="metric-sub">Estimated end: 09:15 AM</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-title">Fraud Attempts Blocked</div>
+              <div class="metric-value" style="color: #f87171; font-size: 1.5rem;">14</div>
+              <div class="metric-sub">12 Mock GPS • 2 Stale Tokens</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; background: rgba(0, 0, 0, 0.3); border-radius: var(--radius-md); padding: 1rem; border: 1px solid var(--border-card);">
+            <div style="font-size: 0.8rem; font-weight: 600; color: #ffffff; margin-bottom: 0.5rem;">
+              ⚡ Station Zero-Hardware Mode:
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-secondary);">
+              This display runs on any existing office laptop connected to a regular monitor or projector. No specialized biometric readers or external hardware needed.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         VIEW 3: NYSC INSPECTOR TERMINAL (Route A)
+         ========================================== -->
+    <section class="role-view" id="view-inspector">
+      <div class="inspector-terminal-grid">
+        
+        <!-- Scanner Viewfinder Column -->
+        <div class="scanner-view-column">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: var(--font-heading); font-size: 1.15rem; color: #ffffff;">
+              📷 Inspector Camera Scanner
+            </h3>
+            <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
+              SCANNER READY
+            </span>
+          </div>
+
+          <!-- Laser Viewfinder Frame -->
+          <div class="viewfinder-box" id="inspector-viewfinder">
+            <div class="viewfinder-reticle"></div>
+            <div class="laser-scanner"></div>
+            <div id="scanner-status-overlay" style="position: absolute; bottom: 12px; font-size: 0.75rem; color: #a7f3d0; background: rgba(0,0,0,0.6); padding: 0.2rem 0.6rem; border-radius: 4px;">
+              Ready to scan Corper Dynamic Pass
+            </div>
+          </div>
+
+          <!-- Scanner Action Controls -->
+          <div class="scanner-controls">
+            <button type="button" class="btn-primary" id="btn-trigger-inspector-scan" style="flex: 1;">
+              ⚡ Scan Corper Pass (Instant Test)
+            </button>
+            <button type="button" class="btn-ctrl" id="btn-toggle-camera-feed" style="width: auto; padding: 0.65rem 1rem;">
+              📹 Live WebCam
+            </button>
+          </div>
+
+          <!-- Audio Feedback Toggle -->
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--text-secondary);">
+            <span>Sound Chime on Clearance</span>
+            <label class="switch">
+              <input type="checkbox" id="inspector-chime-toggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Verification Results & Offline Engine -->
+        <div class="verification-result-column">
+          
+          <!-- Approval Status Card -->
+          <div class="approval-banner" id="inspector-approval-banner">
+            <div class="approval-titles">
+              <h3 id="inspector-status-header">VERIFIED & APPROVED</h3>
+              <p style="font-size: 0.75rem; color: #a7f3d0;" id="inspector-status-sub">
+                Clearance Recorded for November 2026
+              </p>
+            </div>
+            <div style="font-size: 1.8rem;" id="inspector-status-icon">✅</div>
+          </div>
+
+          <!-- Profile Card -->
+          <div class="audit-meta-grid" id="inspector-result-card">
+            <img src="assets/corper_passport.jpg" alt="Verified Corper Photo" class="inspector-verified-photo" id="inspector-photo-match">
+            <div class="record-details">
+              <div class="record-item">
+                <label>Corps Member Name</label>
+                <span id="rec-name">ADELEKE OLUWASEUN</span>
+              </div>
+              <div class="record-item">
+                <label>State Code</label>
+                <span id="rec-statecode" style="color: var(--nysc-gold-light);">LA/24B/4819</span>
+              </div>
+              <div class="record-item">
+                <label>Call-Up Number</label>
+                <span id="rec-callup">NYSC/UAM/2024/098124</span>
+              </div>
+              <div class="record-item">
+                <label>CDS Group</label>
+                <span id="rec-cds">ICT & Digital Skills</span>
+              </div>
+              <div class="record-item" style="grid-column: span 2;">
+                <label>Primary Place of Assignment (PPA)</label>
+                <span id="rec-ppa">Lagos State Ministry of Science & Technology</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Offline Sync Engine -->
+          <div class="offline-sync-card">
+            <div>
+              <div class="offline-toggle-wrapper">
+                <span>Simulate Zero-Internet (Offline Mode)</span>
+                <label class="switch">
+                  <input type="checkbox" id="offline-mode-toggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;" id="offline-status-desc">
+                Online: Direct sync to NYSC Central Database.
+              </p>
+            </div>
+            <button type="button" class="btn-ctrl" id="btn-sync-offline-batch" style="padding: 0.5rem 0.8rem;">
+              🔄 Sync (<span id="offline-pending-count">0</span>)
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         VIEW 4: SIDE-BY-SIDE DUAL SIMULATION VIEW
+         ========================================== -->
+    <section class="role-view" id="view-dual">
+      <div style="margin-bottom: 1.5rem; text-align: center;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: #ffffff;">
+          Interactive End-to-End Walkthrough
+        </h2>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+          Watch the Corper's phone generate a real-time cryptographic pass on the left, and the Inspector's scanner verify it on the right!
+        </p>
+      </div>
+
+      <div class="dual-simulation-grid">
+        <!-- Left Side: Mini Corper -->
+        <div class="dock-card">
+          <div class="dual-col-header">
+            <h3>📱 Corper's Hand</h3>
+            <span class="state-code-pill">LA/24B/4819</span>
+          </div>
+
+          <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: var(--radius-md);">
+            <div class="qr-canvas-wrapper" style="width: 160px; height: 160px;">
+              <canvas id="dual-corper-qr-canvas" width="144" height="144"></canvas>
+              <div class="qr-watermark" style="width: 26px; height: 26px; font-size: 8px;">NYSC</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #ffffff;">ADELEKE OLUWASEUN</div>
+              <div style="font-size: 0.75rem; color: #34d399;">✓ Geofence Verified (18m)</div>
+              <div style="font-size: 0.75rem; color: #34d399;">✓ Face Liveness 98.4%</div>
+              <div style="font-size: 0.7rem; color: var(--nysc-gold-light);" id="dual-timer-text">Expires in 28s</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; text-align: center;">
+            <button type="button" class="btn-primary" id="btn-dual-instant-scan" style="width: 100%; justify-content: center;">
+              ⚡ Inspector Scans Corper's Pass Now (0.4s)
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Side: Mini Inspector -->
+        <div class="dock-card">
+          <div class="dual-col-header">
+            <h3>👮 Official's Verification Terminal</h3>
+            <span class="badge-tag" id="dual-inspector-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+              STANDING BY
+            </span>
+          </div>
+
+          <div id="dual-inspector-result-box" style="background: rgba(0,0,0,0.3); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-card); min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 0.8rem;">
+            <div style="font-size: 2.2rem;" id="dual-result-icon">📱 ➡️ 👮</div>
+            <div style="font-weight: 700; font-size: 1rem; color: #ffffff;" id="dual-result-title">
+              Ready for Next Corper
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary);" id="dual-result-desc">
+              Tap the button on the left to simulate an officer pointing their phone camera at the pass.
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+            <span>Scan Engine Latency: <strong style="color: #34d399;">38ms</strong></span>
+            <span>Signature: <strong style="color: var(--nysc-gold-light);">HMAC-SHA256 Valid</strong></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Modal: Selfie Re-Verification -->
+  <div class="modal-overlay" id="modal-selfie">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Biometric Facial Liveness Check</h3>
+        <button type="button" class="close-btn" id="btn-close-selfie-modal">&times;</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary);">
+        Position your face in the oval frame. Blink once and smile slightly to prove active presence.
+      </p>
+      <div style="width: 100%; height: 260px; background: #000; border-radius: var(--radius-md); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <video id="selfie-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; display: none;"></video>
+        <img src="assets/corper_passport.jpg" alt="Selfie preview" id="selfie-mock-img" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9);">
+        <div style="position: absolute; width: 170px; height: 210px; border: 2px dashed #00ff73; border-radius: 50%; box-shadow: 0 0 15px rgba(0, 255, 115, 0.4);"></div>
+        <div id="selfie-liveness-prompt" style="position: absolute; bottom: 12px; background: rgba(0,0,0,0.7); padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.75rem; color: #a7f3d0;">
+          Checking micro-movements...
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="btn-capture-selfie" style="justify-content: center;">
+        ✓ Confirm Match & Re-Issue Pass
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Modal: Scan Secretariat Screen -->
+  <div class="modal-overlay" id="modal-station-scanner">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Scan Secretariat Screen</h3>
+        <button type="button" class="close-btn" id="btn-close-station-modal">&times;</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary);">
+        Point your camera at the master display on the LGI's desk to capture the live rotating token.
+      </p>
+      <div style="width: 100%; height: 260px; background: #000; border-radius: var(--radius-md); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <div class="laser-scanner"></div>
+        <div style="font-size: 0.8rem; color: var(--nysc-gold-light);">Searching for Master QR...</div>
+      </div>
+      <button type="button" class="btn-gold" id="btn-confirm-station-token" style="justify-content: center;">
+        ⚡ Instant Walkthrough Check-in
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
