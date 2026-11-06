@@ -72,7 +72,7 @@ In Nigeria's public sector, selling software directly to a federal parastatal fr
 > - **100% Offline-First**: Works when MTN/Airtel networks drop at crowded secretariats, queuing signed ECDSA records locally and exporting official NYSC CSV schedules.
 > - **Zero Hardware CAPEX**: Uses the smartphones and laptops LGIs and corps members already have while blocking Mock GPS and WhatsApp screenshot sharing.
 >
-> **Interactive Live Prototype:** [Insert Vercel Link]
+> **Interactive Live Prototype:** https://0xtryhardx0.github.io/geoclearance-nysc/
 >
 > Before we present this for a standalone LGA pilot with the Ministry of Youth Development, we would love to explore licensing or white-labeling this directly to **Sidmach** as an official upgrade to the NYSC Integrated System.
 >
@@ -95,7 +95,7 @@ In Nigeria's public sector, selling software directly to a federal parastatal fr
 >
 > We have developed **GeoClearance NYSC**, a decentralized, zero-hardware biometric and geofence clearance system built to clear **3,000 Corps Members in under 28 minutes** at **zero hardware cost to the Scheme**.
 >
-> **How It Works (Live Demo: [Insert Link]):**
+> **How It Works (Live Demo: https://0xtryhardx0.github.io/geoclearance-nysc/):**
 > 1. **Strict Geofence & Anti-Spoofing**: Validates that the Corps Member is physically inside the LGA Secretariat (within 50m) and blocks fake GPS apps.
 > 2. **Decentralized Facial Liveness + Dynamic 30s QR Pass**: Eliminates WhatsApp screenshot fraud and dirty fingerprint sensors.
 > 3. **Offline-Ready Inspector Terminal & Instant CSV Manifest**: Allows LGIs to scan passes in 0.4 seconds (even without internet) and export the verified monthly clearance schedule in one click.
@@ -122,7 +122,7 @@ In Nigeria's public sector, selling software directly to a federal parastatal fr
 > - Works 100% OFFLINE when network crashes
 > - Clears 1 corper in **0.4 seconds** with zero government hardware cost
 >
-> Live interactive demo 👇 [Link]
+> Live interactive demo 👇 https://0xtryhardx0.github.io/geoclearance-nysc/
 >
 > Let’s modernize NYSC clearance. @OfficialNYSCng @fmydNG @nitdanig @bosuntijani
 

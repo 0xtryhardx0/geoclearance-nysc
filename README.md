@@ -62,9 +62,11 @@ GeoClearance replaces single-point hardware bottlenecks with a **Decentralized D
 No build tools, node modules, or complex dependencies required. It is built with vanilla HTML5, CSS3, and modern JavaScript.
 
 ### Quick Start:
+* **Live Production Demo**: [https://0xtryhardx0.github.io/geoclearance-nysc/](https://0xtryhardx0.github.io/geoclearance-nysc/)
+
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/geoclearance-nysc.git
+git clone https://github.com/0xtryhardx0/geoclearance-nysc.git
 cd geoclearance-nysc
 
 # Serve using any local web server, for example:
