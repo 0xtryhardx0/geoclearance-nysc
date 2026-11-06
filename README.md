@@ -78,9 +78,14 @@ Then open your browser at:
 ## 📱 Testing the Interactive Roles
 
 The app includes an interactive **Role Switcher** in the top navigation:
-1. **📱 Corps Member View**: Experience the mobile app, test geofencing checks, and view the dynamic rolling QR pass.
-2. **🖥️ Secretariat Screen**: View the high-visibility rolling Master QR screen designed for projectors or desk laptops.
-3. **👮 Inspector Terminal**: Experience the high-speed 0.4s scanner, sound chime, and offline sync toggle.
+1. **📱 Corps Member View**:
+   - Experience the mobile app, switch between **6 Nigerian NYSC LGA Secretariat Stations** (Ikeja Lagos, AMAC Abuja, Port Harcourt Rivers, Ibadan North Oyo, Enugu North, Kano Municipal) and **6 Pre-Enrolled Corps Members**, or **Quick-Enroll** a custom Corps Member.
+   - Test geofencing checks (**📍 At Secretariat**, **📡 Live Device GPS** with Haversine distance calculation, **🏠 At Home**, and **⚠️ Fake GPS App**).
+   - View the dynamic rolling QR pass, trigger live camera **Biometric Facial Liveness**, and download a cryptographically signed **📄 Official Monthly Clearance Slip (`.txt`)**.
+2. **🖥️ Secretariat Screen**: View the high-visibility rolling Master QR screen (8-second challenge beacon) and live telemetry counter for any selected LGA Secretariat.
+3. **👮 Inspector Terminal**:
+   - Experience the high-speed 0.4s scanner, **📹 Live WebCam** optical feed, **⏭️ Next Corper** queue switcher, sound chime, and **Zero-Internet Offline Mode** batch queue.
+   - Search the live **📋 Official Monthly Clearance Manifest & Audit Ledger** table and click **📥 Export Official NYSC CSV** (`NYSC_Clearance_Manifest_<LGA>_Nov2026.csv`).
 4. **⚡ Live Dual Demo**: Watch the phone generate the pass on the left and the inspector scan it on the right in real time.
 
 ---

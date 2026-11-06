@@ -1100,3 +1100,164 @@ input:checked + .slider:before {
     white-space: nowrap;
   }
 }
+
+/* ===================================================
+   5. MULTI-CORPER ROSTER, LGA SELECTOR & MANIFEST LOG
+   =================================================== */
+.select-input,
+.input-field {
+  width: 100%;
+  background: rgba(7, 13, 9, 0.9);
+  border: 1px solid var(--border-card);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.select-input:focus,
+.input-field:focus {
+  border-color: var(--nysc-green-light);
+  box-shadow: 0 0 0 2px rgba(0, 168, 84, 0.2);
+}
+
+.roster-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.manifest-section {
+  margin-top: 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.manifest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.manifest-header h3 {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.manifest-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.manifest-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.manifest-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.manifest-table th {
+  background: rgba(13, 24, 16, 0.95);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-card);
+}
+
+.manifest-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.manifest-table tr:last-child td {
+  border-bottom: none;
+}
+
+.manifest-table tr:hover td {
+  background: rgba(0, 168, 84, 0.05);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.status-pill.cleared {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-pill.queued {
+  background: rgba(245, 179, 0, 0.15);
+  color: var(--nysc-gold-light);
+  border: 1px solid rgba(245, 179, 0, 0.3);
+}
+
+.status-pill.denied {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.slip-receipt-box {
+  background: linear-gradient(145deg, rgba(13, 28, 18, 0.95), rgba(7, 15, 10, 0.98));
+  border: 1px solid var(--nysc-gold);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.slip-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.4rem;
+}
+
+.slip-row span:first-child {
+  color: var(--text-secondary);
+}
+
+.slip-row span:last-child {
+  color: #ffffff;
+  font-weight: 600;
+}

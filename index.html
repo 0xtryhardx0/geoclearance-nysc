@@ -71,8 +71,8 @@
               <div class="corper-meta">
                 <h3 id="corper-name-display">ADELEKE OLUWASEUN</h3>
                 <span class="state-code-pill" id="corper-statecode-display">LA/24B/4819</span>
-                <p class="corper-subtext">Lagos State Min. of Science & Tech</p>
-                <p class="corper-subtext">Ikeja LGA • Batch B Stream II</p>
+                <p class="corper-subtext" id="corper-ppa-display">Lagos State Min. of Science & Tech</p>
+                <p class="corper-subtext" id="corper-lga-display">Ikeja LGA • Batch B Stream II</p>
               </div>
             </div>
 
@@ -83,7 +83,7 @@
                 <div class="step-info">
                   <div class="step-icon">📍</div>
                   <div class="step-titles">
-                    <h4>Geofence: Ikeja Secretariat</h4>
+                    <h4 id="geofence-zone-title">Geofence: Ikeja Secretariat</h4>
                     <p id="geofence-status-text">18 meters from Secretariat • In Zone</p>
                   </div>
                 </div>
@@ -141,30 +141,78 @@
               </div>
             </div>
 
-            <!-- Route B Alternative Action -->
-            <div class="walkthrough-scan-box">
-              <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-                Walking past the LGI Master Screen?
+            <!-- Route B Alternative Action & Clearance Slip -->
+            <div class="walkthrough-scan-box" style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.2rem;">
+                Walking past the LGI Master Screen or need your monthly receipt?
               </p>
-              <button type="button" class="btn-gold" id="btn-scan-station-screen">
-                📷 Scan Secretariat Screen
-              </button>
+              <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="btn-gold" id="btn-scan-station-screen" style="font-size: 0.78rem; padding: 0.55rem 0.9rem;">
+                  📷 Scan Secretariat Screen
+                </button>
+                <button type="button" class="btn-ctrl" id="btn-open-clearance-slip" style="flex-direction: row; padding: 0.55rem 0.9rem; font-size: 0.78rem;">
+                  📄 Clearance Slip
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Testing Simulation Dock -->
         <aside class="simulation-dock">
+          <!-- Multi-Corper & LGA Secretariat Selector Card -->
           <div class="dock-card">
-            <h3>🎛️ Location & Anti-Cheat Simulator</h3>
+            <h3>👥 Active Corps Member & LGA Station</h3>
+            <p>Switch between enrolled Corps Members and NYSC LGA Secretariats across Nigeria, or enroll a custom Corper.</p>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+              <div>
+                <label for="select-active-lga" style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">NYSC LGA Secretariat Station</label>
+                <select id="select-active-lga" class="select-input">
+                  <option value="IKJ">Ikeja LGA Secretariat — Lagos State (6.5965°N, 3.3421°E)</option>
+                  <option value="AMC">Abuja Municipal (AMAC) Secretariat — FCT (9.0579°N, 7.4951°E)</option>
+                  <option value="PHC">Port Harcourt City LGA — Rivers State (4.8156°N, 7.0498°E)</option>
+                  <option value="IBN">Ibadan North LGA Secretariat — Oyo State (7.3878°N, 3.8964°E)</option>
+                  <option value="ENU">Enugu North LGA Secretariat — Enugu State (6.4584°N, 7.5464°E)</option>
+                  <option value="KNM">Kano Municipal LGA Secretariat — Kano State (11.9964°N, 8.5167°E)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="select-active-corper" style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Active Corps Member Profile</label>
+                <select id="select-active-corper" class="select-input">
+                  <option value="0">LA/24B/4819 — ADELEKE OLUWASEUN (ICT &amp; Digital Skills)</option>
+                  <option value="1">FC/24C/1092 — IBRAHIM ZAINAB AMINA (Editorial &amp; Publicity)</option>
+                  <option value="2">RV/24B/3310 — OKONKWO CHUKWUDI EMMANUEL (Medical &amp; Health)</option>
+                  <option value="3">OY/24A/7741 — BABATUNDE TOLULOPE GRACE (EFCC Anti-Corruption)</option>
+                  <option value="4">EN/24C/5502 — NWOSU KELECHI VICTOR (NDLEA Drug Free Club)</option>
+                  <option value="5">KN/24B/2188 — MUSA ABDULLAHI SANI (Agro-Allied &amp; SDGs)</option>
+                </select>
+              </div>
+
+              <div class="roster-form-grid">
+                <input type="text" id="input-custom-name" class="input-field" placeholder="Full Name (e.g. OBI CHINEDU)" maxlength="48">
+                <input type="text" id="input-custom-statecode" class="input-field" placeholder="State Code (e.g. LA/25A/1204)" maxlength="16">
+              </div>
+              <button type="button" class="btn-ctrl" id="btn-enroll-custom-corper" style="flex-direction: row; justify-content: center; padding: 0.55rem;">
+                ➕ Quick-Enroll &amp; Switch to Corps Member
+              </button>
+            </div>
+          </div>
+
+          <div class="dock-card">
+            <h3>🎛️ Location &amp; Anti-Cheat Simulator</h3>
             <p>Test how GeoClearance defends against GPS spoofing and ghost check-ins.</p>
             <div class="control-buttons-grid">
               <button type="button" class="btn-ctrl active-ctrl" id="sim-loc-secretariat">
                 <strong>📍 At Secretariat</strong>
                 <span>18m (Inside Zone)</span>
               </button>
+              <button type="button" class="btn-ctrl" id="sim-loc-realgps">
+                <strong>📡 Live Device GPS</strong>
+                <span>Hardware Sensor</span>
+              </button>
               <button type="button" class="btn-ctrl" id="sim-loc-home">
-                <strong>🏠 At Home (Lagos)</strong>
+                <strong>🏠 At Home</strong>
                 <span>14.2 km (Rejected)</span>
               </button>
               <button type="button" class="btn-ctrl danger-ctrl" id="sim-loc-fakegps">
@@ -198,8 +246,8 @@
         <div class="display-qr-section">
           <div class="nysc-seal" style="width: 52px; height: 52px; font-size: 1.2rem;">NYSC</div>
           <div>
-            <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #ffffff;">IKEJA LGA SECRETARIAT</h2>
-            <p style="color: var(--nysc-gold-light); font-size: 0.9rem; font-weight: 600;">STATION #IKJ-HALL-01 • CDS / CLEARANCE TERMINAL</p>
+            <h2 id="secretariat-title-display" style="font-family: var(--font-heading); font-size: 1.6rem; color: #ffffff;">IKEJA LGA SECRETARIAT</h2>
+            <p id="secretariat-station-display" style="color: var(--nysc-gold-light); font-size: 0.9rem; font-weight: 600;">STATION #IKJ-HALL-01 • CDS / CLEARANCE TERMINAL</p>
           </div>
 
           <div class="master-qr-box">
@@ -231,7 +279,7 @@
             <div class="metric-card">
               <div class="metric-title">Cleared Today</div>
               <div class="metric-value highlight-green" id="stat-cleared-count">1,894</div>
-              <div class="metric-sub">Out of 3,240 Enrolled (58.4%)</div>
+              <div class="metric-sub" id="stat-enrolled-sub">Out of 3,240 Enrolled (58.4%)</div>
             </div>
 
             <div class="metric-card">
@@ -248,8 +296,8 @@
 
             <div class="metric-card">
               <div class="metric-title">Fraud Attempts Blocked</div>
-              <div class="metric-value" style="color: #f87171; font-size: 1.5rem;">14</div>
-              <div class="metric-sub">12 Mock GPS • 2 Stale Tokens</div>
+              <div class="metric-value" id="stat-fraud-count" style="color: #f87171; font-size: 1.5rem;">14</div>
+              <div class="metric-sub">Mock GPS &amp; Stale Tokens Blocked</div>
             </div>
           </div>
 
@@ -286,6 +334,7 @@
 
           <!-- Laser Viewfinder Frame -->
           <div class="viewfinder-box" id="inspector-viewfinder">
+            <video id="inspector-camera-video" autoplay playsinline muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none;"></video>
             <div class="viewfinder-reticle"></div>
             <div class="laser-scanner"></div>
             <div id="scanner-status-overlay" style="position: absolute; bottom: 12px; font-size: 0.75rem; color: #a7f3d0; background: rgba(0,0,0,0.6); padding: 0.2rem 0.6rem; border-radius: 4px;">
@@ -294,11 +343,14 @@
           </div>
 
           <!-- Scanner Action Controls -->
-          <div class="scanner-controls">
+          <div class="scanner-controls" style="flex-wrap: wrap;">
             <button type="button" class="btn-primary" id="btn-trigger-inspector-scan" style="flex: 1;">
-              ⚡ Scan Corper Pass (Instant Test)
+              ⚡ Scan Corper Pass
             </button>
-            <button type="button" class="btn-ctrl" id="btn-toggle-camera-feed" style="width: auto; padding: 0.65rem 1rem;">
+            <button type="button" class="btn-ctrl" id="btn-next-corper-queue" style="width: auto; padding: 0.65rem 0.9rem; flex-direction: row;">
+              ⏭️ Next Corper
+            </button>
+            <button type="button" class="btn-ctrl" id="btn-toggle-camera-feed" style="width: auto; padding: 0.65rem 0.9rem; flex-direction: row;">
               📹 Live WebCam
             </button>
           </div>
@@ -319,7 +371,7 @@
           <!-- Approval Status Card -->
           <div class="approval-banner" id="inspector-approval-banner">
             <div class="approval-titles">
-              <h3 id="inspector-status-header">VERIFIED & APPROVED</h3>
+              <h3 id="inspector-status-header">VERIFIED &amp; APPROVED</h3>
               <p style="font-size: 0.75rem; color: #a7f3d0;" id="inspector-status-sub">
                 Clearance Recorded for November 2026
               </p>
@@ -345,11 +397,11 @@
               </div>
               <div class="record-item">
                 <label>CDS Group</label>
-                <span id="rec-cds">ICT & Digital Skills</span>
+                <span id="rec-cds">ICT &amp; Digital Skills</span>
               </div>
               <div class="record-item" style="grid-column: span 2;">
                 <label>Primary Place of Assignment (PPA)</label>
-                <span id="rec-ppa">Lagos State Ministry of Science & Technology</span>
+                <span id="rec-ppa">Lagos State Ministry of Science &amp; Technology</span>
               </div>
             </div>
           </div>
@@ -376,6 +428,43 @@
         </div>
 
       </div>
+
+      <!-- Official Monthly Clearance Manifest & Audit Log -->
+      <div class="manifest-section" id="manifest-section">
+        <div class="manifest-header">
+          <div>
+            <h3>📋 Official Monthly Clearance Manifest &amp; Audit Ledger</h3>
+            <p style="font-size: 0.78rem; color: var(--text-secondary);">
+              Cryptographically signed attendance records ready for LGI endorsement and NYSC Integrated System upload.
+            </p>
+          </div>
+          <div class="manifest-actions">
+            <input type="text" id="input-manifest-search" class="input-field" placeholder="Search State Code or Name..." style="width: 210px;">
+            <button type="button" class="btn-gold" id="btn-export-manifest-csv">
+              📥 Export Official NYSC CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="manifest-table-wrapper">
+          <table class="manifest-table">
+            <thead>
+              <tr>
+                <th>Time (WAT)</th>
+                <th>Corps Member Name</th>
+                <th>State Code</th>
+                <th>Call-Up Number</th>
+                <th>LGA Station</th>
+                <th>Sync Mode</th>
+                <th>Signature Token</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="manifest-table-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
 
@@ -397,7 +486,7 @@
         <div class="dock-card">
           <div class="dual-col-header">
             <h3>📱 Corper's Hand</h3>
-            <span class="state-code-pill">LA/24B/4819</span>
+            <span class="state-code-pill" id="dual-corper-statecode">LA/24B/4819</span>
           </div>
 
           <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: var(--radius-md);">
@@ -406,16 +495,19 @@
               <div class="qr-watermark" style="width: 26px; height: 26px; font-size: 8px;">NYSC</div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <div style="font-size: 0.8rem; font-weight: 700; color: #ffffff;">ADELEKE OLUWASEUN</div>
-              <div style="font-size: 0.75rem; color: #34d399;">✓ Geofence Verified (18m)</div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #ffffff;" id="dual-corper-name">ADELEKE OLUWASEUN</div>
+              <div style="font-size: 0.75rem; color: #34d399;" id="dual-geofence-line">✓ Geofence Verified (18m)</div>
               <div style="font-size: 0.75rem; color: #34d399;">✓ Face Liveness 98.4%</div>
               <div style="font-size: 0.7rem; color: var(--nysc-gold-light);" id="dual-timer-text">Expires in 28s</div>
             </div>
           </div>
 
-          <div style="margin-top: 1rem; text-align: center;">
-            <button type="button" class="btn-primary" id="btn-dual-instant-scan" style="width: 100%; justify-content: center;">
-              ⚡ Inspector Scans Corper's Pass Now (0.4s)
+          <div style="margin-top: 1rem; display: flex; gap: 0.6rem;">
+            <button type="button" class="btn-primary" id="btn-dual-instant-scan" style="flex: 1; justify-content: center;">
+              ⚡ Inspector Scans Pass Now (0.4s)
+            </button>
+            <button type="button" class="btn-ctrl" id="btn-dual-next-corper" style="flex-direction: row; padding: 0.65rem 0.9rem;">
+              ⏭️ Next Corper
             </button>
           </div>
         </div>
@@ -468,7 +560,7 @@
         </div>
       </div>
       <button type="button" class="btn-primary" id="btn-capture-selfie" style="justify-content: center;">
-        ✓ Confirm Match & Re-Issue Pass
+        ✓ Confirm Match &amp; Re-Issue Pass
       </button>
     </div>
   </div>
@@ -489,6 +581,57 @@
       </div>
       <button type="button" class="btn-gold" id="btn-confirm-station-token" style="justify-content: center;">
         ⚡ Instant Walkthrough Check-in
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Modal: Monthly Clearance Slip Receipt -->
+  <div class="modal-overlay" id="modal-clearance-slip">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Official NYSC Monthly Clearance Slip</h3>
+        <button type="button" class="close-btn" id="btn-close-slip-modal">&times;</button>
+      </div>
+      <div class="slip-receipt-box">
+        <div style="text-align: center; border-bottom: 1px solid rgba(245, 179, 0, 0.3); padding-bottom: 0.6rem; margin-bottom: 0.25rem;">
+          <div style="font-family: var(--font-heading); font-weight: 800; color: var(--nysc-gold-light); font-size: 0.95rem;">
+            NATIONAL YOUTH SERVICE CORPS
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-secondary);">
+            Biometric &amp; Geofenced Monthly Clearance Certificate
+          </div>
+        </div>
+        <div class="slip-row">
+          <span>Corps Member Name</span>
+          <span id="slip-name">ADELEKE OLUWASEUN</span>
+        </div>
+        <div class="slip-row">
+          <span>State Code</span>
+          <span id="slip-statecode" style="color: var(--nysc-gold-light);">LA/24B/4819</span>
+        </div>
+        <div class="slip-row">
+          <span>Call-Up Number</span>
+          <span id="slip-callup">NYSC/UAM/2024/098124</span>
+        </div>
+        <div class="slip-row">
+          <span>LGA Secretariat</span>
+          <span id="slip-lga">Ikeja LGA Secretariat</span>
+        </div>
+        <div class="slip-row">
+          <span>Clearance Month</span>
+          <span id="slip-month">November 2026</span>
+        </div>
+        <div class="slip-row">
+          <span>Verification Status</span>
+          <span id="slip-status" style="color: #34d399;">CLEARED FOR ALLOWANCE</span>
+        </div>
+        <div class="slip-row" style="border-bottom: none;">
+          <span>Cryptographic Signature</span>
+          <span id="slip-sig" style="font-family: monospace; font-size: 0.72rem;">0x4f8e...92cb</span>
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="btn-download-slip-file" style="justify-content: center;">
+        📥 Download Signed Clearance Certificate (.txt)
       </button>
     </div>
   </div>
