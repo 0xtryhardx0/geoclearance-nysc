@@ -99,5 +99,6 @@ The app includes an interactive **Role Switcher** in the top navigation:
 
 ---
 
-## 📄 License
-MIT License. Built for the advancement and welfare of Nigerian Corps Members.
+## 📄 Intellectual Property & License
+**Proprietary & Confidential — All Rights Reserved (© 2026 Erioluwa Ayodeji / GeoClearance Systems).**  
+ Protected under the Nigerian Copyright Commission (NCC) Literary/Software Works Registry. Unauthorized reproduction, reverse engineering, commercial deployment, or derivative integration without a written commercial license is strictly prohibited.
