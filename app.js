@@ -413,9 +413,18 @@
 
     // Simulation Dock Buttons
     simLocSecretariat: document.getElementById('sim-loc-secretariat'),
+    simLocBuddy: document.getElementById('sim-loc-buddy'),
     simLocRealgps: document.getElementById('sim-loc-realgps'),
     simLocHome: document.getElementById('sim-loc-home'),
+    simLocVelocity: document.getElementById('sim-loc-velocity'),
     simLocFakeGps: document.getElementById('sim-loc-fakegps'),
+
+    // Sector Mode & Smart Queue AI
+    selectSectorMode: document.getElementById('select-sector-mode'),
+    appSeal: document.getElementById('app-seal'),
+    smartSlotTitle: document.getElementById('smart-slot-title'),
+    smartSlotSub: document.getElementById('smart-slot-sub'),
+    smartSlotBadge: document.getElementById('smart-slot-badge'),
 
     // Secretariat View
     secretariatTitleDisplay: document.getElementById('secretariat-title-display'),
@@ -433,11 +442,17 @@
     btnTriggerInspectorScan: document.getElementById('btn-trigger-inspector-scan'),
     btnNextCorperQueue: document.getElementById('btn-next-corper-queue'),
     btnToggleCameraFeed: document.getElementById('btn-toggle-camera-feed'),
+    inputDeadphoneCode: document.getElementById('input-deadphone-code'),
+    btnDeadphoneClear: document.getElementById('btn-deadphone-clear'),
     inspectorChimeToggle: document.getElementById('inspector-chime-toggle'),
     inspectorApprovalBanner: document.getElementById('inspector-approval-banner'),
     inspectorStatusHeader: document.getElementById('inspector-status-header'),
     inspectorStatusSub: document.getElementById('inspector-status-sub'),
     inspectorStatusIcon: document.getElementById('inspector-status-icon'),
+    inspectorAiVerdictBox: document.getElementById('inspector-ai-verdict-box'),
+    inspectorAiTitle: document.getElementById('inspector-ai-title'),
+    inspectorAiSub: document.getElementById('inspector-ai-sub'),
+    inspectorAiBadge: document.getElementById('inspector-ai-badge'),
     scannerStatusOverlay: document.getElementById('scanner-status-overlay'),
     recName: document.getElementById('rec-name'),
     recStatecode: document.getElementById('rec-statecode'),
@@ -645,6 +660,10 @@
       const matrix = CompactQR.generateMatrix(`GEO-NYSC-CLEARANCE:${STATE.corper.stateCode}:${STATE.activeLgaCode}:${hash}`);
       CompactQR.drawToCanvas(el.corperQrCanvas, matrix, '#005a2b', '#ffffff');
       CompactQR.drawToCanvas(el.dualCorperQrCanvas, matrix, '#005a2b', '#ffffff');
+    } else if (STATE.locationStatus === 'buddy') {
+      const buddyMatrix = CompactQR.generateMatrix(`BUDDY-ASSIST:${STATE.corper.stateCode}:${STATE.activeLgaCode}:${hash}`);
+      CompactQR.drawToCanvas(el.corperQrCanvas, buddyMatrix, '#b45309', '#fef3c7');
+      CompactQR.drawToCanvas(el.dualCorperQrCanvas, buddyMatrix, '#b45309', '#fef3c7');
     } else {
       const invalidMatrix = CompactQR.generateMatrix(`REVOKED:${STATE.locationStatus}`);
       CompactQR.drawToCanvas(el.corperQrCanvas, invalidMatrix, '#ef4444', '#fee2e2');
@@ -787,16 +806,18 @@
     }
   }
 
-  // --- 15. Location & Anti-Cheat Simulator Controls ---
+  // --- 15. Location, XXII-Sentinel AI & Buddy-Assist Simulator Controls ---
   function initSimulationControls() {
     const resetButtons = () => {
       el.simLocSecretariat.classList.remove('active-ctrl');
+      if (el.simLocBuddy) el.simLocBuddy.classList.remove('active-ctrl');
       if (el.simLocRealgps) el.simLocRealgps.classList.remove('active-ctrl');
       el.simLocHome.classList.remove('active-ctrl');
+      if (el.simLocVelocity) el.simLocVelocity.classList.remove('active-ctrl');
       el.simLocFakeGps.classList.remove('active-ctrl');
     };
 
-    // Case 1: At Secretariat (Legitimate)
+    // Case 1: At Secretariat (Legitimate Passive AI Verified)
     el.simLocSecretariat.addEventListener('click', () => {
       resetButtons();
       el.simLocSecretariat.classList.add('active-ctrl');
@@ -809,15 +830,46 @@
       el.geofenceBadge.textContent = 'VERIFIED';
 
       el.mockgpsCard.className = 'step-card verified';
-      el.mockgpsStatusText.textContent = 'Hardware GPS locked (Mock: None)';
+      el.mockgpsStatusText.textContent = 'Speed: 1.2 m/s (Walking) • Jitter: ±1.4m Natural';
       el.mockgpsBadge.className = 'step-badge';
-      el.mockgpsBadge.textContent = 'SECURE';
+      el.mockgpsBadge.textContent = '0.02% RISK';
 
-      el.dualGeofenceLine.textContent = '✓ Geofence Verified (18m)';
+      el.livenessCard.className = 'step-card verified';
+      el.livenessStatusText.textContent = 'Passive Gyro + Sensor Match 99.4% (No Selfie Needed)';
+
+      el.dualGeofenceLine.textContent = '✓ Geofence & XXII-Sentinel AI Verified (18m)';
       el.dualGeofenceLine.style.color = '#34d399';
 
       refreshCorperPass();
     });
+
+    // Case 1B: Buddy-Assist Mode (Dead Battery / Borrowed Friend's Phone)
+    if (el.simLocBuddy) {
+      el.simLocBuddy.addEventListener('click', () => {
+        resetButtons();
+        el.simLocBuddy.classList.add('active-ctrl');
+        STATE.locationStatus = 'buddy';
+        STATE.measuredDistanceMeters = 16;
+
+        el.geofenceCard.className = 'step-card verified';
+        el.geofenceStatusText.textContent = '16 meters from Secretariat • Shared Device in Zone';
+        el.geofenceBadge.className = 'step-badge';
+        el.geofenceBadge.textContent = 'IN ZONE';
+
+        el.mockgpsCard.className = 'step-card verified';
+        el.mockgpsStatusText.textContent = '2nd Corper Login on Device (Dead Battery Assist)';
+        el.mockgpsBadge.className = 'step-badge';
+        el.mockgpsBadge.textContent = 'BUDDY MODE';
+
+        el.livenessCard.className = 'step-card verified';
+        el.livenessStatusText.textContent = 'Prompts 1s LGI Passport Visual Check at Desk';
+
+        el.dualGeofenceLine.textContent = '🔋 Buddy-Assist Pass (LGI Visual Photo Match)';
+        el.dualGeofenceLine.style.color = '#fbbf24';
+
+        refreshCorperPass();
+      });
+    }
 
     // Case 2: Live Device GPS (Browser Geolocation API)
     if (el.simLocRealgps) {
@@ -847,9 +899,9 @@
             el.geofenceBadge.textContent = 'GPS LOCKED';
 
             el.mockgpsCard.className = 'step-card verified';
-            el.mockgpsStatusText.textContent = 'OS Hardware Location Provider Verified';
+            el.mockgpsStatusText.textContent = 'OS Hardware Location & Natural Drift Verified';
             el.mockgpsBadge.className = 'step-badge';
-            el.mockgpsBadge.textContent = 'SECURE';
+            el.mockgpsBadge.textContent = '0.01% RISK';
 
             el.dualGeofenceLine.textContent = `✓ Live GPS Locked (${latitude.toFixed(3)}°N)`;
             el.dualGeofenceLine.style.color = '#34d399';
@@ -880,9 +932,9 @@
       el.geofenceBadge.textContent = 'OUT OF ZONE';
 
       el.mockgpsCard.className = 'step-card verified';
-      el.mockgpsStatusText.textContent = 'Hardware GPS locked';
+      el.mockgpsStatusText.textContent = 'Hardware GPS locked (Outside Perimeter)';
       el.mockgpsBadge.className = 'step-badge';
-      el.mockgpsBadge.textContent = 'SECURE';
+      el.mockgpsBadge.textContent = 'OUTSIDE';
 
       el.dualGeofenceLine.textContent = '✕ Out of Zone (14.2 km away)';
       el.dualGeofenceLine.style.color = '#f87171';
@@ -890,33 +942,94 @@
       refreshCorperPass();
     });
 
-    // Case 4: Fake GPS App Detected (Spoof Attempt)
+    // Case 3B: Impossible Velocity Teleportation (Lekki -> Ikeja in 3 mins = 428 km/h)
+    if (el.simLocVelocity) {
+      el.simLocVelocity.addEventListener('click', () => {
+        resetButtons();
+        el.simLocVelocity.classList.add('active-ctrl');
+        STATE.locationStatus = 'velocity';
+
+        el.geofenceCard.className = 'step-card failed';
+        el.geofenceStatusText.textContent = 'Ping Jump: Lekki Ph1 ➔ Ikeja (21.4 km in 3m)';
+        el.geofenceBadge.className = 'step-badge fail';
+        el.geofenceBadge.textContent = 'TELEPORT';
+
+        el.mockgpsCard.className = 'step-card failed';
+        el.mockgpsStatusText.textContent = 'Impossible Speed: 428 km/h (>Max 90 km/h)';
+        el.mockgpsBadge.className = 'step-badge fail';
+        el.mockgpsBadge.textContent = '99.4% FRAUD';
+
+        el.dualGeofenceLine.textContent = '✕ AI Blocked: 428 km/h Impossible Travel';
+        el.dualGeofenceLine.style.color = '#f87171';
+
+        refreshCorperPass();
+      });
+    }
+
+    // Case 4: Fake GPS App Detected (0.000m Frozen Synthetic Jitter)
     el.simLocFakeGps.addEventListener('click', () => {
       resetButtons();
       el.simLocFakeGps.classList.add('active-ctrl');
       STATE.locationStatus = 'fakegps';
 
       el.geofenceCard.className = 'step-card failed';
-      el.geofenceStatusText.textContent = 'Coordinates flagged by OS provider';
+      el.geofenceStatusText.textContent = 'Synthetic Frozen Pin (0.0000m Drift)';
       el.geofenceBadge.className = 'step-badge fail';
       el.geofenceBadge.textContent = 'FLAGGED';
 
       el.mockgpsCard.className = 'step-card failed';
-      el.mockgpsStatusText.textContent = 'MOCK LOCATION DETECTED (Play Integrity fail)';
+      el.mockgpsStatusText.textContent = 'MOCK GPS DETECTED (Zero Gyro Motion + Frozen Pin)';
       el.mockgpsBadge.className = 'step-badge fail';
-      el.mockgpsBadge.textContent = 'FRAUD RISK';
+      el.mockgpsBadge.textContent = '98.9% FRAUD';
 
-      el.dualGeofenceLine.textContent = '✕ Fraud Alert: Mock GPS Detected';
+      el.dualGeofenceLine.textContent = '✕ Fraud Alert: Frozen Mock GPS Detected';
       el.dualGeofenceLine.style.color = '#f87171';
 
       refreshCorperPass();
     });
+
+    // Multi-Sector Switcher (NYSC / University / Security Patrol)
+    if (el.selectSectorMode) {
+      el.selectSectorMode.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        const tabCorperSpan = document.querySelector('#tab-corper-btn span');
+        const tabSecSpan = document.querySelector('#tab-secretariat-btn span');
+        const tabInspSpan = document.querySelector('#tab-inspector-btn span');
+
+        if (mode === 'UNI') {
+          if (el.appSeal) el.appSeal.textContent = 'UNI';
+          if (tabCorperSpan) tabCorperSpan.textContent = '📱 Student App';
+          if (tabSecSpan) tabSecSpan.textContent = '🖥️ Lecture Hall Projector';
+          if (tabInspSpan) tabInspSpan.textContent = '🎓 Invigilator Terminal';
+          if (el.smartSlotTitle) el.smartSlotTitle.textContent = '🧠 Exam Eligibility AI: 88% ATTENDANCE';
+          if (el.smartSlotSub) el.smartSlotSub.textContent = 'CSC 401 Lecture Hall • 75% Threshold Met';
+          if (el.smartSlotBadge) el.smartSlotBadge.textContent = 'ELIGIBLE';
+        } else if (mode === 'SEC') {
+          if (el.appSeal) el.appSeal.textContent = 'OPS';
+          if (tabCorperSpan) tabCorperSpan.textContent = '📱 Guard Patrol App';
+          if (tabSecSpan) tabSecSpan.textContent = '🖥️ Site Beacon Display';
+          if (tabInspSpan) tabInspSpan.textContent = '🛡️ Supervisor Console';
+          if (el.smartSlotTitle) el.smartSlotTitle.textContent = '🧠 Night-Shift Patrol AI: ON POST';
+          if (el.smartSlotSub) el.smartSlotSub.textContent = 'Hourly Check-in Window: 02:00 AM • Verified';
+          if (el.smartSlotBadge) el.smartSlotBadge.textContent = 'ON SITE';
+        } else {
+          if (el.appSeal) el.appSeal.textContent = 'NYSC';
+          if (tabCorperSpan) tabCorperSpan.textContent = '📱 Corps Member';
+          if (tabSecSpan) tabSecSpan.textContent = '🖥️ Secretariat Screen';
+          if (tabInspSpan) tabInspSpan.textContent = '👮 Inspector Terminal';
+          if (el.smartSlotTitle) el.smartSlotTitle.textContent = '🧠 Smart Queue AI: LOW CROWD';
+          if (el.smartSlotSub) el.smartSlotSub.textContent = 'Window: 08:30–09:00 AM • Est. Wait: ~2 mins';
+          if (el.smartSlotBadge) el.smartSlotBadge.textContent = 'SLOT OPEN';
+        }
+      });
+    }
   }
 
-  // --- 16. Inspector Scanner & Manifest Logging ---
+  // --- 16. Inspector Scanner, AI Verdict & Manifest Logging ---
   function performInspectorScan(isDualDemo = false) {
     const station = LGA_STATIONS[STATE.activeLgaCode] || LGA_STATIONS.IKJ;
-    const isZoneValid = (STATE.locationStatus === 'secretariat' || STATE.locationStatus === 'realgps');
+    const isBuddyMode = (STATE.locationStatus === 'buddy');
+    const isZoneValid = (STATE.locationStatus === 'secretariat' || STATE.locationStatus === 'realgps' || isBuddyMode);
 
     if (!isZoneValid) {
       playVerificationChime(false);
@@ -925,9 +1038,15 @@
         el.statFraudCount.textContent = String(STATE.fraudCount);
       }
 
-      const reason = STATE.locationStatus === 'fakegps'
-        ? 'FRAUD DETECTED: Fake GPS Spoofing Provider'
-        : 'REJECTED: Device is 14.2 km outside Secretariat Geofence';
+      let reason = 'REJECTED: Device is 14.2 km outside Secretariat Geofence';
+      let syncLabel = 'BLOCKED (OUT OF ZONE)';
+      if (STATE.locationStatus === 'velocity') {
+        reason = 'XXII-SENTINEL AI BLOCK: Impossible Velocity (Lekki ➔ Ikeja 21.4km in 3m = 428 km/h)';
+        syncLabel = 'AI BLOCKED (428 KM/H TELEPORT)';
+      } else if (STATE.locationStatus === 'fakegps') {
+        reason = 'XXII-SENTINEL AI BLOCK: Frozen Synthetic Mock GPS Pin (0.000m Jitter)';
+        syncLabel = 'AI BLOCKED (MOCK GPS)';
+      }
 
       el.inspectorApprovalBanner.className = 'approval-banner';
       el.inspectorApprovalBanner.style.borderColor = 'rgba(239, 68, 68, 0.5)';
@@ -937,20 +1056,30 @@
       el.inspectorStatusSub.textContent = reason;
       el.inspectorStatusIcon.textContent = '❌';
 
+      if (el.inspectorAiVerdictBox) {
+        el.inspectorAiVerdictBox.style.background = 'rgba(239, 68, 68, 0.14)';
+        el.inspectorAiVerdictBox.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        el.inspectorAiTitle.style.color = '#f87171';
+        el.inspectorAiTitle.textContent = '🧠 XXII-Sentinel AI Risk Score: 99.4% (SPOOF BLOCKED)';
+        el.inspectorAiSub.textContent = reason;
+        el.inspectorAiBadge.className = 'step-badge fail';
+        el.inspectorAiBadge.textContent = 'BLOCKED';
+      }
+
       STATE.manifestLog.unshift({
         time: getFormattedTimeWAT(),
         name: STATE.corper.name,
         stateCode: STATE.corper.stateCode,
         callUpNumber: STATE.corper.callUpNumber,
         lgaName: station.name,
-        syncMode: STATE.locationStatus === 'fakegps' ? 'BLOCKED (MOCK GPS)' : 'BLOCKED (OUT OF ZONE)',
+        syncMode: syncLabel,
         tokenSig: `REVOKED:${STATE.locationStatus.toUpperCase()}`,
         status: 'DENIED'
       });
       renderManifestTable();
 
       if (isDualDemo) {
-        el.dualInspectorBadge.textContent = 'DENIED';
+        el.dualInspectorBadge.textContent = 'AI BLOCKED';
         el.dualInspectorBadge.style.background = 'rgba(239, 68, 68, 0.2)';
         el.dualInspectorBadge.style.color = '#f87171';
         el.dualResultIcon.textContent = '❌';
@@ -961,16 +1090,36 @@
       return;
     }
 
-    // Valid Clearance
+    // Valid Clearance (Standard or Buddy-Assist Dead Battery Mode)
     playVerificationChime(true);
 
     el.inspectorApprovalBanner.className = 'approval-banner';
-    el.inspectorApprovalBanner.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-    el.inspectorApprovalBanner.style.background = 'linear-gradient(135deg, rgba(0, 135, 68, 0.25), rgba(16, 185, 129, 0.1))';
-    el.inspectorStatusHeader.textContent = 'VERIFIED & APPROVED';
-    el.inspectorStatusHeader.style.color = '#34d399';
-    el.inspectorStatusSub.textContent = `Clearance Stamped: Nov 2026 (${station.code} • Pass: ${currentPassToken.slice(0, 8)})`;
-    el.inspectorStatusIcon.textContent = '✅';
+    el.inspectorApprovalBanner.style.borderColor = isBuddyMode ? 'rgba(245, 179, 0, 0.5)' : 'rgba(16, 185, 129, 0.4)';
+    el.inspectorApprovalBanner.style.background = isBuddyMode
+      ? 'linear-gradient(135deg, rgba(180, 83, 9, 0.28), rgba(245, 179, 0, 0.12))'
+      : 'linear-gradient(135deg, rgba(0, 135, 68, 0.25), rgba(16, 185, 129, 0.1))';
+    el.inspectorStatusHeader.textContent = isBuddyMode
+      ? 'BUDDY-ASSIST APPROVED (VISUAL ID MATCH)'
+      : 'VERIFIED & APPROVED';
+    el.inspectorStatusHeader.style.color = isBuddyMode ? '#fbbf24' : '#34d399';
+    el.inspectorStatusSub.textContent = isBuddyMode
+      ? `Dead-Battery Assist Verified via LGI Passport Check (${station.code})`
+      : `Clearance Stamped: Nov 2026 (${station.code} • Pass: ${currentPassToken.slice(0, 8)})`;
+    el.inspectorStatusIcon.textContent = isBuddyMode ? '🔋' : '✅';
+
+    if (el.inspectorAiVerdictBox) {
+      el.inspectorAiVerdictBox.style.background = isBuddyMode ? 'rgba(245, 179, 0, 0.12)' : 'rgba(16, 185, 129, 0.1)';
+      el.inspectorAiVerdictBox.style.borderColor = isBuddyMode ? 'rgba(245, 179, 0, 0.35)' : 'rgba(52, 211, 153, 0.3)';
+      el.inspectorAiTitle.style.color = isBuddyMode ? '#fbbf24' : '#34d399';
+      el.inspectorAiTitle.textContent = isBuddyMode
+        ? '🧠 XXII-Sentinel: Buddy-Assist (2nd Login on Shared Phone)'
+        : '🧠 XXII-Sentinel AI Risk Score: 0.02% (SAFE)';
+      el.inspectorAiSub.textContent = isBuddyMode
+        ? 'Corper battery dead — LGI confirmed physical passport photo at desk.'
+        : 'Velocity: 1.2 m/s Walking • Hardware GPS Jitter: ±1.4m Natural';
+      el.inspectorAiBadge.className = 'step-badge';
+      el.inspectorAiBadge.textContent = isBuddyMode ? 'BUDDY OK' : 'AUTHENTIC';
+    }
 
     STATE.clearedCount++;
     el.statClearedCount.textContent = STATE.clearedCount.toLocaleString();
@@ -1005,7 +1154,7 @@
         stateCode: STATE.corper.stateCode,
         callUpNumber: STATE.corper.callUpNumber,
         lgaName: station.name,
-        syncMode: 'ONLINE (CLOUD)',
+        syncMode: isBuddyMode ? 'ONLINE (BUDDY-ASSIST)' : 'ONLINE (CLOUD)',
         tokenSig: shortSig,
         status: 'CLEARED'
       });
@@ -1014,13 +1163,15 @@
     renderManifestTable();
 
     if (isDualDemo) {
-      el.dualInspectorBadge.textContent = 'CLEARED IN 0.4s';
+      el.dualInspectorBadge.textContent = isBuddyMode ? 'BUDDY-ASSIST OK' : 'CLEARED IN 0.4s';
       el.dualInspectorBadge.style.background = 'rgba(16, 185, 129, 0.2)';
       el.dualInspectorBadge.style.color = '#34d399';
-      el.dualResultIcon.textContent = '✅';
+      el.dualResultIcon.textContent = isBuddyMode ? '🔋' : '✅';
       el.dualResultTitle.textContent = `Approved: ${STATE.corper.name}`;
       el.dualResultTitle.style.color = '#34d399';
-      el.dualResultDesc.textContent = `State Code: ${STATE.corper.stateCode} • ${station.name} Validated`;
+      el.dualResultDesc.textContent = isBuddyMode
+        ? `State Code: ${STATE.corper.stateCode} • Cleared via Buddy-Assist Visual Match`
+        : `State Code: ${STATE.corper.stateCode} • ${station.name} Validated`;
     }
   }
 
@@ -1098,6 +1249,60 @@
   function initInspectorControls() {
     el.btnTriggerInspectorScan.addEventListener('click', () => performInspectorScan(false));
     el.btnDualInstantScan.addEventListener('click', () => performInspectorScan(true));
+
+    // Dead-Battery / No-Phone LGI Visual ID Kiosk Clear
+    if (el.btnDeadphoneClear && el.inputDeadphoneCode) {
+      el.btnDeadphoneClear.addEventListener('click', () => {
+        const query = (el.inputDeadphoneCode.value || '').trim().toUpperCase();
+        if (query) {
+          const foundIdx = CORPER_ROSTER.findIndex(c =>
+            c.stateCode.toUpperCase().includes(query) ||
+            c.name.toUpperCase().includes(query)
+          );
+          if (foundIdx !== -1) {
+            STATE.activeCorperIndex = foundIdx;
+            STATE.corper = { ...CORPER_ROSTER[foundIdx], month: 'November 2026' };
+            if (el.selectActiveCorper) el.selectActiveCorper.value = String(foundIdx);
+            syncActiveProfileToUI();
+          }
+        }
+        const station = LGA_STATIONS[STATE.activeLgaCode] || LGA_STATIONS.IKJ;
+        playVerificationChime(true);
+
+        el.inspectorApprovalBanner.className = 'approval-banner';
+        el.inspectorApprovalBanner.style.borderColor = 'rgba(245, 179, 0, 0.5)';
+        el.inspectorApprovalBanner.style.background = 'linear-gradient(135deg, rgba(180, 83, 9, 0.28), rgba(245, 179, 0, 0.12))';
+        el.inspectorStatusHeader.textContent = 'CLEARED VIA LGI VISUAL KIOSK (DEAD BATTERY)';
+        el.inspectorStatusHeader.style.color = '#fbbf24';
+        el.inspectorStatusSub.textContent = `Physical Passport Verified at ${station.code} Desk (${STATE.corper.stateCode})`;
+        el.inspectorStatusIcon.textContent = '🔋';
+
+        if (el.inspectorAiVerdictBox) {
+          el.inspectorAiVerdictBox.style.background = 'rgba(245, 179, 0, 0.12)';
+          el.inspectorAiVerdictBox.style.borderColor = 'rgba(245, 179, 0, 0.35)';
+          el.inspectorAiTitle.style.color = '#fbbf24';
+          el.inspectorAiTitle.textContent = '🧠 XXII-Sentinel: LGI Kiosk Override (Dead Battery / No Device)';
+          el.inspectorAiSub.textContent = `Officer confirmed physical presence of ${STATE.corper.name} against NYSC passport photo.`;
+          el.inspectorAiBadge.className = 'step-badge';
+          el.inspectorAiBadge.textContent = 'KIOSK OK';
+        }
+
+        STATE.clearedCount++;
+        el.statClearedCount.textContent = STATE.clearedCount.toLocaleString();
+        STATE.manifestLog.unshift({
+          time: getFormattedTimeWAT(),
+          name: STATE.corper.name,
+          stateCode: STATE.corper.stateCode,
+          callUpNumber: STATE.corper.callUpNumber,
+          lgaName: station.name,
+          syncMode: 'LGI VISUAL KIOSK (DEAD BAT)',
+          tokenSig: `KIOSK:${station.code}:${Date.now().toString(16).slice(-6)}`,
+          status: 'CLEARED'
+        });
+        renderManifestTable();
+        el.inputDeadphoneCode.value = '';
+      });
+    }
 
     if (el.inputManifestSearch) {
       el.inputManifestSearch.addEventListener('input', renderManifestTable);
