@@ -653,7 +653,7 @@
     const hash = await generateTokenHash(payload);
     currentPassToken = hash;
 
-    el.tokenSignatureHash.textContent = `SIG: 0x${hash.slice(0, 10)}...${hash.slice(-8)} (Ed25519)`;
+    el.tokenSignatureHash.textContent = `TOKEN: XXII-${hash.slice(0, 8)}...${hash.slice(-6)} (PROPRIETARY)`;
 
     const isZoneValid = (STATE.locationStatus === 'secretariat' || STATE.locationStatus === 'realgps');
     if (isZoneValid) {
@@ -830,12 +830,12 @@
       el.geofenceBadge.textContent = 'VERIFIED';
 
       el.mockgpsCard.className = 'step-card verified';
-      el.mockgpsStatusText.textContent = 'Speed: 1.2 m/s (Walking) • Jitter: ±1.4m Natural';
+      el.mockgpsStatusText.textContent = 'Physical Telemetry Verified • Zero Spoof';
       el.mockgpsBadge.className = 'step-badge';
       el.mockgpsBadge.textContent = '0.02% RISK';
 
       el.livenessCard.className = 'step-card verified';
-      el.livenessStatusText.textContent = 'Passive Gyro + Sensor Match 99.4% (No Selfie Needed)';
+      el.livenessStatusText.textContent = 'Passive Biometric Match 99.4% (Zero Bounceback)';
 
       el.dualGeofenceLine.textContent = '✓ Geofence & XXII-Sentinel AI Verified (18m)';
       el.dualGeofenceLine.style.color = '#34d399';
@@ -942,7 +942,7 @@
       refreshCorperPass();
     });
 
-    // Case 3B: Impossible Velocity Teleportation (Lekki -> Ikeja in 3 mins = 428 km/h)
+    // Case 3B: Remote Teleportation Spoof (Lekki -> Ikeja)
     if (el.simLocVelocity) {
       el.simLocVelocity.addEventListener('click', () => {
         resetButtons();
@@ -950,39 +950,39 @@
         STATE.locationStatus = 'velocity';
 
         el.geofenceCard.className = 'step-card failed';
-        el.geofenceStatusText.textContent = 'Ping Jump: Lekki Ph1 ➔ Ikeja (21.4 km in 3m)';
+        el.geofenceStatusText.textContent = 'Remote Teleport Anomaly Detected (Lekki ➔ Ikeja)';
         el.geofenceBadge.className = 'step-badge fail';
         el.geofenceBadge.textContent = 'TELEPORT';
 
         el.mockgpsCard.className = 'step-card failed';
-        el.mockgpsStatusText.textContent = 'Impossible Speed: 428 km/h (>Max 90 km/h)';
+        el.mockgpsStatusText.textContent = 'XXII-Sentinel Blocked Remote Coordinate Jump';
         el.mockgpsBadge.className = 'step-badge fail';
         el.mockgpsBadge.textContent = '99.4% FRAUD';
 
-        el.dualGeofenceLine.textContent = '✕ AI Blocked: 428 km/h Impossible Travel';
+        el.dualGeofenceLine.textContent = '✕ AI Blocked: Remote Teleport Spoof';
         el.dualGeofenceLine.style.color = '#f87171';
 
         refreshCorperPass();
       });
     }
 
-    // Case 4: Fake GPS App Detected (0.000m Frozen Synthetic Jitter)
+    // Case 4: Fake GPS App Detected
     el.simLocFakeGps.addEventListener('click', () => {
       resetButtons();
       el.simLocFakeGps.classList.add('active-ctrl');
       STATE.locationStatus = 'fakegps';
 
       el.geofenceCard.className = 'step-card failed';
-      el.geofenceStatusText.textContent = 'Synthetic Frozen Pin (0.0000m Drift)';
+      el.geofenceStatusText.textContent = 'Synthetic Emulator Location Flagged';
       el.geofenceBadge.className = 'step-badge fail';
       el.geofenceBadge.textContent = 'FLAGGED';
 
       el.mockgpsCard.className = 'step-card failed';
-      el.mockgpsStatusText.textContent = 'MOCK GPS DETECTED (Zero Gyro Motion + Frozen Pin)';
+      el.mockgpsStatusText.textContent = 'XXII-Sentinel Blocked Mock GPS Emulator';
       el.mockgpsBadge.className = 'step-badge fail';
       el.mockgpsBadge.textContent = '98.9% FRAUD';
 
-      el.dualGeofenceLine.textContent = '✕ Fraud Alert: Frozen Mock GPS Detected';
+      el.dualGeofenceLine.textContent = '✕ Fraud Alert: Mock GPS Emulator Blocked';
       el.dualGeofenceLine.style.color = '#f87171';
 
       refreshCorperPass();
@@ -1041,10 +1041,10 @@
       let reason = 'REJECTED: Device is 14.2 km outside Secretariat Geofence';
       let syncLabel = 'BLOCKED (OUT OF ZONE)';
       if (STATE.locationStatus === 'velocity') {
-        reason = 'XXII-SENTINEL AI BLOCK: Impossible Velocity (Lekki ➔ Ikeja 21.4km in 3m = 428 km/h)';
-        syncLabel = 'AI BLOCKED (428 KM/H TELEPORT)';
+        reason = 'XXII-SENTINEL AI BLOCK: Remote Coordinate Teleportation Detected';
+        syncLabel = 'AI BLOCKED (TELEPORT SPOOF)';
       } else if (STATE.locationStatus === 'fakegps') {
-        reason = 'XXII-SENTINEL AI BLOCK: Frozen Synthetic Mock GPS Pin (0.000m Jitter)';
+        reason = 'XXII-SENTINEL AI BLOCK: Synthetic Mock GPS Emulator Detected';
         syncLabel = 'AI BLOCKED (MOCK GPS)';
       }
 
@@ -1116,7 +1116,7 @@
         : '🧠 XXII-Sentinel AI Risk Score: 0.02% (SAFE)';
       el.inspectorAiSub.textContent = isBuddyMode
         ? 'Corper battery dead — LGI confirmed physical passport photo at desk.'
-        : 'Velocity: 1.2 m/s Walking • Hardware GPS Jitter: ±1.4m Natural';
+        : 'Proprietary Spatial & Presence Telemetry Verified';
       el.inspectorAiBadge.className = 'step-badge';
       el.inspectorAiBadge.textContent = isBuddyMode ? 'BUDDY OK' : 'AUTHENTIC';
     }
