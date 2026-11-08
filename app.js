@@ -996,14 +996,14 @@
         const tabSecSpan = document.querySelector('#tab-secretariat-btn span');
         const tabInspSpan = document.querySelector('#tab-inspector-btn span');
 
-        if (mode === 'UNI') {
-          if (el.appSeal) el.appSeal.textContent = 'UNI';
-          if (tabCorperSpan) tabCorperSpan.textContent = '📱 Student App';
-          if (tabSecSpan) tabSecSpan.textContent = '🖥️ Lecture Hall Projector';
-          if (tabInspSpan) tabInspSpan.textContent = '🎓 Invigilator Terminal';
-          if (el.smartSlotTitle) el.smartSlotTitle.textContent = '🧠 Exam Eligibility AI: 88% ATTENDANCE';
-          if (el.smartSlotSub) el.smartSlotSub.textContent = 'CSC 401 Lecture Hall • 75% Threshold Met';
-          if (el.smartSlotBadge) el.smartSlotBadge.textContent = 'ELIGIBLE';
+        if (mode === 'CIV') {
+          if (el.appSeal) el.appSeal.textContent = 'GOV';
+          if (tabCorperSpan) tabCorperSpan.textContent = '📱 Civil Servant ID';
+          if (tabSecSpan) tabSecSpan.textContent = '🖥️ Ministry Hall Beacon';
+          if (tabInspSpan) tabInspSpan.textContent = '🏛️ Payroll Audit Console';
+          if (el.smartSlotTitle) el.smartSlotTitle.textContent = '🧠 Ghost-Worker Audit AI: VERIFIED ACTIVE';
+          if (el.smartSlotSub) el.smartSlotSub.textContent = 'State Secretariat Biometric Payroll Verification';
+          if (el.smartSlotBadge) el.smartSlotBadge.textContent = 'PAYROLL OK';
         } else if (mode === 'SEC') {
           if (el.appSeal) el.appSeal.textContent = 'OPS';
           if (tabCorperSpan) tabCorperSpan.textContent = '📱 Guard Patrol App';
