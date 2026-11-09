@@ -763,18 +763,97 @@
         });
 
         STATE.currentRole = targetViewId;
+        if (targetViewId === 'view-secretariat') {
+          refreshStationToken();
+        } else if (targetViewId === 'view-corper' || targetViewId === 'view-dual') {
+          refreshCorperPass();
+        }
       });
     });
   }
 
-  // --- 11. Clock & Heartbeat ---
-  function startClock() {
-    const updateTime = () => {
-      el.timeDisplay.textContent = getFormattedTimeWAT();
-    };
-    updateTime();
-    setInterval(updateTime, 1000);
+  // --- 11. Battery-Saving Power & Heartbeat Manager ---
+  let clockInterval = null;
+  let corperInterval = null;
+  let stationInterval = null;
+  let isTabActive = true;
+
+  function getBaseUrl() {
+    return window.location.origin + window.location.pathname;
   }
+
+  function startHeartbeats() {
+    if (clockInterval) clearInterval(clockInterval);
+    if (corperInterval) clearInterval(corperInterval);
+    if (stationInterval) clearInterval(stationInterval);
+
+    el.timeDisplay.textContent = getFormattedTimeWAT();
+    clockInterval = setInterval(() => {
+      if (!isTabActive) return;
+      el.timeDisplay.textContent = getFormattedTimeWAT();
+    }, 1000);
+
+    corperInterval = setInterval(() => {
+      if (!isTabActive) return;
+      STATE.corperPassTimeRemaining--;
+      if (STATE.corperPassTimeRemaining <= 0) {
+        STATE.corperPassTimeRemaining = STATE.corperPassInterval;
+        if (STATE.currentRole === 'view-corper' || STATE.currentRole === 'view-dual') {
+          refreshCorperPass();
+        }
+      }
+
+      if (STATE.currentRole === 'view-corper' || STATE.currentRole === 'view-dual') {
+        el.qrRefreshTimer.textContent = `Pass refreshes in ${STATE.corperPassTimeRemaining}s`;
+        el.dualTimerText.textContent = `Expires in ${STATE.corperPassTimeRemaining}s`;
+
+        const circle = document.querySelector('.progress-ring__circle');
+        if (circle) {
+          const offset = 62.8 * (1 - STATE.corperPassTimeRemaining / STATE.corperPassInterval);
+          circle.style.strokeDashoffset = offset;
+        }
+      }
+    }, 1000);
+
+    stationInterval = setInterval(() => {
+      if (!isTabActive) return;
+      STATE.stationTokenTimeRemaining--;
+      if (STATE.stationTokenTimeRemaining <= 0) {
+        STATE.stationTokenTimeRemaining = STATE.stationTokenInterval;
+        if (STATE.currentRole === 'view-secretariat') {
+          refreshStationToken();
+        }
+      }
+
+      if (STATE.currentRole === 'view-secretariat') {
+        el.stationTokenCounter.textContent = `Refresh in ${STATE.stationTokenTimeRemaining}s`;
+        const progressPercent = (STATE.stationTokenTimeRemaining / STATE.stationTokenInterval) * 100;
+        el.stationProgressBar.style.width = `${progressPercent}%`;
+      }
+    }, 1000);
+  }
+
+  function pauseHeartbeats() {
+    isTabActive = false;
+  }
+
+  function resumeHeartbeats() {
+    isTabActive = true;
+    el.timeDisplay.textContent = getFormattedTimeWAT();
+    if (STATE.currentRole === 'view-secretariat') {
+      refreshStationToken();
+    } else if (STATE.currentRole === 'view-corper' || STATE.currentRole === 'view-dual') {
+      refreshCorperPass();
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      pauseHeartbeats();
+    } else {
+      resumeHeartbeats();
+    }
+  });
 
   // --- 12. Dynamic Corper Pass Refresh Loop ---
   let currentPassToken = '';
@@ -787,7 +866,7 @@
 
     el.tokenSignatureHash.textContent = `TOKEN: XXII-${hash.slice(0, 8)}...${hash.slice(-6)} (PROPRIETARY)`;
 
-    const baseUrl = 'https://0xtryhardx0.github.io/geoclearance-nysc/';
+    const baseUrl = getBaseUrl();
     const scanUrl = `${baseUrl}?s=1&c=${STATE.activeCorperIndex}&l=${STATE.activeLgaCode}&m=${STATE.locationStatus}`;
 
     const isZoneValid = (STATE.locationStatus === 'secretariat' || STATE.locationStatus === 'realgps');
@@ -806,27 +885,6 @@
     }
   }
 
-  function startCorperTimer() {
-    refreshCorperPass();
-
-    setInterval(() => {
-      STATE.corperPassTimeRemaining--;
-      if (STATE.corperPassTimeRemaining <= 0) {
-        STATE.corperPassTimeRemaining = STATE.corperPassInterval;
-        refreshCorperPass();
-      }
-
-      el.qrRefreshTimer.textContent = `Pass refreshes in ${STATE.corperPassTimeRemaining}s`;
-      el.dualTimerText.textContent = `Expires in ${STATE.corperPassTimeRemaining}s`;
-
-      const circle = document.querySelector('.progress-ring__circle');
-      if (circle) {
-        const offset = 62.8 * (1 - STATE.corperPassTimeRemaining / STATE.corperPassInterval);
-        circle.style.strokeDashoffset = offset;
-      }
-    }, 1000);
-  }
-
   // --- 13. Rotating Station Master QR (Route B) ---
   let stationMasterToken = '';
 
@@ -838,26 +896,10 @@
     const hash = await generateTokenHash(payload);
     stationMasterToken = hash.slice(0, 16);
 
-    const baseUrl = 'https://0xtryhardx0.github.io/geoclearance-nysc/';
+    const baseUrl = getBaseUrl();
     const beaconUrl = `${baseUrl}?s=2&l=${STATE.activeLgaCode}&t=${stationMasterToken.slice(0, 6)}`;
     const matrix = CompactQR.generateMatrix(beaconUrl);
     CompactQR.drawToCanvas(el.stationMasterQrCanvas, matrix, '#008744', '#ffffff');
-  }
-
-  function startStationTimer() {
-    refreshStationToken();
-
-    setInterval(() => {
-      STATE.stationTokenTimeRemaining--;
-      if (STATE.stationTokenTimeRemaining <= 0) {
-        STATE.stationTokenTimeRemaining = STATE.stationTokenInterval;
-        refreshStationToken();
-      }
-
-      el.stationTokenCounter.textContent = `Refresh in ${STATE.stationTokenTimeRemaining}s`;
-      const progressPercent = (STATE.stationTokenTimeRemaining / STATE.stationTokenInterval) * 100;
-      el.stationProgressBar.style.width = `${progressPercent}%`;
-    }, 1000);
   }
 
   // --- 14. Roster, Custom Enroll & LGA Station Controls ---
@@ -1673,15 +1715,13 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
-    startClock();
     initRosterAndLgaControls();
     initSimulationControls();
     initInspectorControls();
     initModals();
     syncActiveProfileToUI();
     renderManifestTable();
-    startCorperTimer();
-    startStationTimer();
+    startHeartbeats();
     handleMobileCameraScanParams();
   });
 

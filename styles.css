@@ -834,6 +834,13 @@ body {
   background: linear-gradient(90deg, transparent, #00ff73, transparent);
   box-shadow: 0 0 15px #00ff73;
   animation: scanLaser 2s infinite ease-in-out;
+  animation-play-state: paused;
+  will-change: top, opacity;
+}
+
+.role-view.active-view .laser-scanner,
+.modal-overlay.active-modal .laser-scanner {
+  animation-play-state: running;
 }
 
 @keyframes scanLaser {
