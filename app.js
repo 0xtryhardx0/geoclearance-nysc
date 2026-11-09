@@ -514,11 +514,24 @@
     views: document.querySelectorAll('.role-view'),
     timeDisplay: document.getElementById('system-time-display'),
 
-    // Corper Card & Stepper
+    // Corper Mobile Pass & Status
     corperNameDisplay: document.getElementById('corper-name-display'),
     corperStatecodeDisplay: document.getElementById('corper-statecode-display'),
     corperPpaDisplay: document.getElementById('corper-ppa-display'),
     corperLgaDisplay: document.getElementById('corper-lga-display'),
+    clearanceStatusBanner: document.getElementById('clearance-status-banner'),
+    statusIndicatorDot: document.getElementById('status-indicator-dot'),
+    statusBannerTitle: document.getElementById('status-banner-title'),
+    statusBannerSub: document.getElementById('status-banner-sub'),
+    passValidTag: document.getElementById('pass-valid-tag'),
+    passInstructionText: document.getElementById('pass-instruction-text'),
+    corperQrCanvas: document.getElementById('corper-qr-canvas'),
+    dualCorperQrCanvas: document.getElementById('dual-corper-qr-canvas'),
+    qrRefreshTimer: document.getElementById('qr-refresh-timer'),
+    tokenSignatureHash: document.getElementById('token-signature-hash'),
+    btnOpenClearanceSlip: document.getElementById('btn-open-clearance-slip'),
+
+    // Legacy / Guarded Stepper & Scan elements
     geofenceZoneTitle: document.getElementById('geofence-zone-title'),
     geofenceCard: document.getElementById('step-geofence-card'),
     geofenceStatusText: document.getElementById('geofence-status-text'),
@@ -529,14 +542,9 @@
     livenessCard: document.getElementById('step-liveness-card'),
     livenessStatusText: document.getElementById('liveness-status-text'),
     btnReverifySelfie: document.getElementById('btn-reverify-selfie'),
-    corperQrCanvas: document.getElementById('corper-qr-canvas'),
-    dualCorperQrCanvas: document.getElementById('dual-corper-qr-canvas'),
-    qrRefreshTimer: document.getElementById('qr-refresh-timer'),
-    tokenSignatureHash: document.getElementById('token-signature-hash'),
     btnScanStationScreen: document.getElementById('btn-scan-station-screen'),
-    btnOpenClearanceSlip: document.getElementById('btn-open-clearance-slip'),
 
-    // Roster & LGA Selectors
+    // Roster & LGA Selectors (Sidmach Pre-loaded)
     selectActiveLga: document.getElementById('select-active-lga'),
     selectActiveCorper: document.getElementById('select-active-corper'),
     inputCustomName: document.getElementById('input-custom-name'),
@@ -641,30 +649,31 @@
     const station = LGA_STATIONS[STATE.activeLgaCode] || LGA_STATIONS.IKJ;
 
     // Phone Card
-    el.corperNameDisplay.textContent = c.name;
-    el.corperStatecodeDisplay.textContent = c.stateCode;
-    el.corperPpaDisplay.textContent = c.ppa;
-    el.corperLgaDisplay.textContent = `${station.name} • ${c.batch || 'Batch B Stream II'}`;
-    el.geofenceZoneTitle.textContent = `Geofence: ${station.name}`;
+    if (el.corperNameDisplay) el.corperNameDisplay.textContent = c.name;
+    if (el.corperStatecodeDisplay) el.corperStatecodeDisplay.textContent = c.stateCode;
+    if (el.corperPpaDisplay) el.corperPpaDisplay.textContent = c.ppa;
+    if (el.corperLgaDisplay) el.corperLgaDisplay.textContent = `${station.name} • ${c.batch || 'Batch B Stream II'}`;
+    if (el.geofenceZoneTitle) el.geofenceZoneTitle.textContent = `Geofence: ${station.name}`;
 
     // Secretariat Master Display
-    el.secretariatTitleDisplay.textContent = station.title;
-    el.secretariatStationDisplay.textContent = station.stationTag;
+    if (el.secretariatTitleDisplay) el.secretariatTitleDisplay.textContent = station.title;
+    if (el.secretariatStationDisplay) el.secretariatStationDisplay.textContent = station.stationTag;
     const pct = ((STATE.clearedCount / station.enrolled) * 100).toFixed(1);
-    el.statClearedCount.textContent = STATE.clearedCount.toLocaleString();
-    el.statEnrolledSub.textContent = `Out of ${station.enrolled.toLocaleString()} Enrolled (${pct}%)`;
+    if (el.statClearedCount) el.statClearedCount.textContent = STATE.clearedCount.toLocaleString();
+    if (el.statEnrolledSub) el.statEnrolledSub.textContent = `Out of ${station.enrolled.toLocaleString()} Enrolled (${pct}%)`;
 
     // Inspector Profile Card
-    el.recName.textContent = c.name;
-    el.recStatecode.textContent = c.stateCode;
-    el.recCallup.textContent = c.callUpNumber;
-    el.recCds.textContent = c.cds;
-    el.recPpa.textContent = c.ppa;
+    if (el.recName) el.recName.textContent = c.name;
+    if (el.recStatecode) el.recStatecode.textContent = c.stateCode;
+    if (el.recCallup) el.recCallup.textContent = c.callUpNumber;
+    if (el.recCds) el.recCds.textContent = c.cds;
+    if (el.recPpa) el.recPpa.textContent = c.ppa;
 
     // Dual Demo Card
-    el.dualCorperStatecode.textContent = c.stateCode;
-    el.dualCorperName.textContent = c.name;
+    if (el.dualCorperStatecode) el.dualCorperStatecode.textContent = c.stateCode;
+    if (el.dualCorperName) el.dualCorperName.textContent = c.name;
 
+    updateClearanceStatusUI();
     refreshCorperPass();
     refreshStationToken();
   }
@@ -864,7 +873,9 @@
     const hash = await generateTokenHash(payload);
     currentPassToken = hash;
 
-    el.tokenSignatureHash.textContent = `TOKEN: XXII-${hash.slice(0, 8)}...${hash.slice(-6)} (PROPRIETARY)`;
+    if (el.tokenSignatureHash) {
+      el.tokenSignatureHash.textContent = `TOKEN: XXII-${hash.slice(0, 8)}...${hash.slice(-6)} (PROPRIETARY)`;
+    }
 
     const baseUrl = getBaseUrl();
     const scanUrl = `${baseUrl}?s=1&c=${STATE.activeCorperIndex}&l=${STATE.activeLgaCode}&m=${STATE.locationStatus}`;
@@ -873,15 +884,15 @@
     if (isZoneValid) {
       const matrix = CompactQR.generateMatrix(scanUrl);
       CompactQR.drawToCanvas(el.corperQrCanvas, matrix, '#005a2b', '#ffffff');
-      CompactQR.drawToCanvas(el.dualCorperQrCanvas, matrix, '#005a2b', '#ffffff');
+      if (el.dualCorperQrCanvas) CompactQR.drawToCanvas(el.dualCorperQrCanvas, matrix, '#005a2b', '#ffffff');
     } else if (STATE.locationStatus === 'buddy') {
       const buddyMatrix = CompactQR.generateMatrix(scanUrl);
       CompactQR.drawToCanvas(el.corperQrCanvas, buddyMatrix, '#b45309', '#fef3c7');
-      CompactQR.drawToCanvas(el.dualCorperQrCanvas, buddyMatrix, '#b45309', '#fef3c7');
+      if (el.dualCorperQrCanvas) CompactQR.drawToCanvas(el.dualCorperQrCanvas, buddyMatrix, '#b45309', '#fef3c7');
     } else {
       const invalidMatrix = CompactQR.generateMatrix(scanUrl);
       CompactQR.drawToCanvas(el.corperQrCanvas, invalidMatrix, '#ef4444', '#fee2e2');
-      CompactQR.drawToCanvas(el.dualCorperQrCanvas, invalidMatrix, '#ef4444', '#fee2e2');
+      if (el.dualCorperQrCanvas) CompactQR.drawToCanvas(el.dualCorperQrCanvas, invalidMatrix, '#ef4444', '#fee2e2');
     }
   }
 
@@ -985,42 +996,147 @@
     }
   }
 
+  // --- 14. Real-Time Clearance Status & Telemetry UI ---
+  function updateClearanceStatusUI() {
+    const station = LGA_STATIONS[STATE.activeLgaCode] || LGA_STATIONS.IKJ;
+    if (!el.clearanceStatusBanner) return;
+
+    el.clearanceStatusBanner.className = 'clearance-status-banner';
+
+    switch (STATE.locationStatus) {
+      case 'secretariat':
+        el.clearanceStatusBanner.classList.add('in-zone');
+        if (el.statusBannerTitle) el.statusBannerTitle.textContent = '📍 Inside Clearance Zone';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = `${station.name} Secretariat • Verified Present (${STATE.measuredDistanceMeters || 18}m)`;
+        if (el.passValidTag) {
+          el.passValidTag.className = 'pass-valid-tag';
+          el.passValidTag.textContent = 'READY FOR SCAN';
+        }
+        if (el.passInstructionText) {
+          el.passInstructionText.textContent = 'Show this QR pass to the NYSC Inspector at the clearance desk.';
+        }
+        if (el.dualGeofenceLine) {
+          el.dualGeofenceLine.textContent = `✓ Geofence & AI Verified (${STATE.measuredDistanceMeters || 18}m)`;
+          el.dualGeofenceLine.style.color = '#34d399';
+        }
+        break;
+
+      case 'realgps':
+        el.clearanceStatusBanner.classList.add('in-zone');
+        if (el.statusBannerTitle) el.statusBannerTitle.textContent = '📍 Inside Clearance Zone';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = `Live Device GPS Locked • ${station.name} Secretariat`;
+        if (el.passValidTag) {
+          el.passValidTag.className = 'pass-valid-tag';
+          el.passValidTag.textContent = 'GPS VERIFIED';
+        }
+        if (el.passInstructionText) {
+          el.passInstructionText.textContent = 'Show this QR pass to the NYSC Inspector at the clearance desk.';
+        }
+        if (el.dualGeofenceLine) {
+          el.dualGeofenceLine.textContent = `✓ Live Hardware GPS Locked`;
+          el.dualGeofenceLine.style.color = '#34d399';
+        }
+        break;
+
+      case 'buddy':
+        el.clearanceStatusBanner.classList.add('buddy-mode');
+        if (el.statusBannerTitle) el.statusBannerTitle.textContent = '🔋 Buddy-Assist Mode Active';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = 'Shared Device in Zone • LGI Visual Passport Match Required';
+        if (el.passValidTag) {
+          el.passValidTag.className = 'pass-valid-tag buddy';
+          el.passValidTag.textContent = 'BUDDY PASS';
+        }
+        if (el.passInstructionText) {
+          el.passInstructionText.textContent = 'Present phone to Inspector for direct visual passport photo match.';
+        }
+        if (el.dualGeofenceLine) {
+          el.dualGeofenceLine.textContent = '🔋 Buddy-Assist Pass (LGI Visual Photo Match)';
+          el.dualGeofenceLine.style.color = '#fbbf24';
+        }
+        break;
+
+      case 'home':
+        el.clearanceStatusBanner.classList.add('out-zone');
+        if (el.statusBannerTitle) el.statusBannerTitle.textContent = '⚠️ Outside Clearance Zone';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = '14.2 km from Secretariat • Move within LGA perimeter to activate pass';
+        if (el.passValidTag) {
+          el.passValidTag.className = 'pass-valid-tag fail';
+          el.passValidTag.textContent = 'OUT OF ZONE';
+        }
+        if (el.passInstructionText) {
+          el.passInstructionText.textContent = 'Clearance pass locked until you arrive at the LGA Secretariat.';
+        }
+        if (el.dualGeofenceLine) {
+          el.dualGeofenceLine.textContent = '✕ Out of Zone (14.2 km away)';
+          el.dualGeofenceLine.style.color = '#f87171';
+        }
+        break;
+
+      case 'velocity':
+        el.clearanceStatusBanner.classList.add('fraud-risk');
+        if (el.statusBannerTitle) el.statusBannerTitle.textContent = '❌ Spoof Detected: Teleport Anomaly';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = 'Remote Coordinate Jump Blocked (Lekki ➔ Ikeja)';
+        if (el.passValidTag) {
+          el.passValidTag.className = 'pass-valid-tag fail';
+          el.passValidTag.textContent = 'PASS BLOCKED';
+        }
+        if (el.passInstructionText) {
+          el.passInstructionText.textContent = 'Security audit flag generated. Please report to Secretariat in person.';
+        }
+        if (el.dualGeofenceLine) {
+          el.dualGeofenceLine.textContent = '✕ AI Blocked: Remote Teleport Spoof';
+          el.dualGeofenceLine.style.color = '#f87171';
+        }
+        break;
+
+      case 'fakegps':
+        el.clearanceStatusBanner.classList.add('fraud-risk');
+        if (el.statusBannerTitle) el.statusBannerTitle.textContent = '❌ Spoof Detected: Mock Location Flagged';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = 'Synthetic Emulator / Fake GPS App Identified';
+        if (el.passValidTag) {
+          el.passValidTag.className = 'pass-valid-tag fail';
+          el.passValidTag.textContent = 'PASS BLOCKED';
+        }
+        if (el.passInstructionText) {
+          el.passInstructionText.textContent = 'Disable mock location apps and restart device to clear your pass.';
+        }
+        if (el.dualGeofenceLine) {
+          el.dualGeofenceLine.textContent = '✕ Fraud Alert: Mock GPS Emulator Blocked';
+          el.dualGeofenceLine.style.color = '#f87171';
+        }
+        break;
+
+      default:
+        el.clearanceStatusBanner.classList.add('in-zone');
+        if (el.statusBannerTitle) el.statusBannerTitle.textContent = '📍 Inside Clearance Zone';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = `${station.name} Secretariat • Verified`;
+        break;
+    }
+  }
+
   // --- 15. Location, XXII-Sentinel AI & Buddy-Assist Simulator Controls ---
   function initSimulationControls() {
     const resetButtons = () => {
-      el.simLocSecretariat.classList.remove('active-ctrl');
+      if (el.simLocSecretariat) el.simLocSecretariat.classList.remove('active-ctrl');
       if (el.simLocBuddy) el.simLocBuddy.classList.remove('active-ctrl');
       if (el.simLocRealgps) el.simLocRealgps.classList.remove('active-ctrl');
-      el.simLocHome.classList.remove('active-ctrl');
+      if (el.simLocHome) el.simLocHome.classList.remove('active-ctrl');
       if (el.simLocVelocity) el.simLocVelocity.classList.remove('active-ctrl');
-      el.simLocFakeGps.classList.remove('active-ctrl');
+      if (el.simLocFakeGps) el.simLocFakeGps.classList.remove('active-ctrl');
     };
 
     // Case 1: At Secretariat (Legitimate Passive AI Verified)
-    el.simLocSecretariat.addEventListener('click', () => {
-      resetButtons();
-      el.simLocSecretariat.classList.add('active-ctrl');
-      STATE.locationStatus = 'secretariat';
-      STATE.measuredDistanceMeters = 18;
+    if (el.simLocSecretariat) {
+      el.simLocSecretariat.addEventListener('click', () => {
+        resetButtons();
+        el.simLocSecretariat.classList.add('active-ctrl');
+        STATE.locationStatus = 'secretariat';
+        STATE.measuredDistanceMeters = 18;
 
-      el.geofenceCard.className = 'step-card verified';
-      el.geofenceStatusText.textContent = '18 meters from Secretariat • In Zone';
-      el.geofenceBadge.className = 'step-badge';
-      el.geofenceBadge.textContent = 'VERIFIED';
-
-      el.mockgpsCard.className = 'step-card verified';
-      el.mockgpsStatusText.textContent = 'Physical Telemetry Verified • Zero Spoof';
-      el.mockgpsBadge.className = 'step-badge';
-      el.mockgpsBadge.textContent = '0.02% RISK';
-
-      el.livenessCard.className = 'step-card verified';
-      el.livenessStatusText.textContent = 'Passive Biometric Match 99.4% (Zero Bounceback)';
-
-      el.dualGeofenceLine.textContent = '✓ Geofence & XXII-Sentinel AI Verified (18m)';
-      el.dualGeofenceLine.style.color = '#34d399';
-
-      refreshCorperPass();
-    });
+        updateClearanceStatusUI();
+        refreshCorperPass();
+      });
+    }
 
     // Case 1B: Buddy-Assist Mode (Dead Battery / Borrowed Friend's Phone)
     if (el.simLocBuddy) {
@@ -1030,22 +1146,7 @@
         STATE.locationStatus = 'buddy';
         STATE.measuredDistanceMeters = 16;
 
-        el.geofenceCard.className = 'step-card verified';
-        el.geofenceStatusText.textContent = '16 meters from Secretariat • Shared Device in Zone';
-        el.geofenceBadge.className = 'step-badge';
-        el.geofenceBadge.textContent = 'IN ZONE';
-
-        el.mockgpsCard.className = 'step-card verified';
-        el.mockgpsStatusText.textContent = '2nd Corper Login on Device (Dead Battery Assist)';
-        el.mockgpsBadge.className = 'step-badge';
-        el.mockgpsBadge.textContent = 'BUDDY MODE';
-
-        el.livenessCard.className = 'step-card verified';
-        el.livenessStatusText.textContent = 'Prompts 1s LGI Passport Visual Check at Desk';
-
-        el.dualGeofenceLine.textContent = '🔋 Buddy-Assist Pass (LGI Visual Photo Match)';
-        el.dualGeofenceLine.style.color = '#fbbf24';
-
+        updateClearanceStatusUI();
         refreshCorperPass();
       });
     }
@@ -1055,11 +1156,12 @@
       el.simLocRealgps.addEventListener('click', () => {
         resetButtons();
         el.simLocRealgps.classList.add('active-ctrl');
-        el.geofenceStatusText.textContent = 'Acquiring hardware GPS satellite lock...';
+        if (el.statusBannerSub) el.statusBannerSub.textContent = 'Acquiring hardware GPS satellite lock...';
 
         if (!navigator.geolocation) {
           STATE.locationStatus = 'realgps';
-          el.geofenceStatusText.textContent = 'Calibrated to Local Device Anchor (±8m) • In Zone';
+          STATE.measuredDistanceMeters = 20;
+          updateClearanceStatusUI();
           refreshCorperPass();
           return;
         }
@@ -1072,26 +1174,16 @@
             STATE.locationStatus = 'realgps';
             STATE.measuredDistanceMeters = Math.min(dist, 24);
 
-            el.geofenceCard.className = 'step-card verified';
-            el.geofenceStatusText.textContent = `Live GPS: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (±${Math.round(accuracy || 12)}m) • Calibrated`;
-            el.geofenceBadge.className = 'step-badge';
-            el.geofenceBadge.textContent = 'GPS LOCKED';
-
-            el.mockgpsCard.className = 'step-card verified';
-            el.mockgpsStatusText.textContent = 'OS Hardware Location & Natural Drift Verified';
-            el.mockgpsBadge.className = 'step-badge';
-            el.mockgpsBadge.textContent = '0.01% RISK';
-
-            el.dualGeofenceLine.textContent = `✓ Live GPS Locked (${latitude.toFixed(3)}°N)`;
-            el.dualGeofenceLine.style.color = '#34d399';
+            updateClearanceStatusUI();
+            if (el.statusBannerSub) {
+              el.statusBannerSub.textContent = `Live GPS: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (±${Math.round(accuracy || 12)}m) • In Zone`;
+            }
             refreshCorperPass();
           },
           () => {
             STATE.locationStatus = 'realgps';
-            el.geofenceCard.className = 'step-card verified';
-            el.geofenceStatusText.textContent = 'Hardware Anchor Verified (22m from Station) • In Zone';
-            el.geofenceBadge.className = 'step-badge';
-            el.geofenceBadge.textContent = 'VERIFIED';
+            STATE.measuredDistanceMeters = 22;
+            updateClearanceStatusUI();
             refreshCorperPass();
           },
           { enableHighAccuracy: true, timeout: 5000 }
@@ -1100,26 +1192,17 @@
     }
 
     // Case 3: At Home (Out of Zone)
-    el.simLocHome.addEventListener('click', () => {
-      resetButtons();
-      el.simLocHome.classList.add('active-ctrl');
-      STATE.locationStatus = 'home';
+    if (el.simLocHome) {
+      el.simLocHome.addEventListener('click', () => {
+        resetButtons();
+        el.simLocHome.classList.add('active-ctrl');
+        STATE.locationStatus = 'home';
+        STATE.measuredDistanceMeters = 14200;
 
-      el.geofenceCard.className = 'step-card failed';
-      el.geofenceStatusText.textContent = '14.2 km away from Secretariat • Out of Zone';
-      el.geofenceBadge.className = 'step-badge fail';
-      el.geofenceBadge.textContent = 'OUT OF ZONE';
-
-      el.mockgpsCard.className = 'step-card verified';
-      el.mockgpsStatusText.textContent = 'Hardware GPS locked (Outside Perimeter)';
-      el.mockgpsBadge.className = 'step-badge';
-      el.mockgpsBadge.textContent = 'OUTSIDE';
-
-      el.dualGeofenceLine.textContent = '✕ Out of Zone (14.2 km away)';
-      el.dualGeofenceLine.style.color = '#f87171';
-
-      refreshCorperPass();
-    });
+        updateClearanceStatusUI();
+        refreshCorperPass();
+      });
+    }
 
     // Case 3B: Remote Teleportation Spoof (Lekki -> Ikeja)
     if (el.simLocVelocity) {
@@ -1128,44 +1211,22 @@
         el.simLocVelocity.classList.add('active-ctrl');
         STATE.locationStatus = 'velocity';
 
-        el.geofenceCard.className = 'step-card failed';
-        el.geofenceStatusText.textContent = 'Remote Teleport Anomaly Detected (Lekki ➔ Ikeja)';
-        el.geofenceBadge.className = 'step-badge fail';
-        el.geofenceBadge.textContent = 'TELEPORT';
-
-        el.mockgpsCard.className = 'step-card failed';
-        el.mockgpsStatusText.textContent = 'XXII-Sentinel Blocked Remote Coordinate Jump';
-        el.mockgpsBadge.className = 'step-badge fail';
-        el.mockgpsBadge.textContent = '99.4% FRAUD';
-
-        el.dualGeofenceLine.textContent = '✕ AI Blocked: Remote Teleport Spoof';
-        el.dualGeofenceLine.style.color = '#f87171';
-
+        updateClearanceStatusUI();
         refreshCorperPass();
       });
     }
 
     // Case 4: Fake GPS App Detected
-    el.simLocFakeGps.addEventListener('click', () => {
-      resetButtons();
-      el.simLocFakeGps.classList.add('active-ctrl');
-      STATE.locationStatus = 'fakegps';
+    if (el.simLocFakeGps) {
+      el.simLocFakeGps.addEventListener('click', () => {
+        resetButtons();
+        el.simLocFakeGps.classList.add('active-ctrl');
+        STATE.locationStatus = 'fakegps';
 
-      el.geofenceCard.className = 'step-card failed';
-      el.geofenceStatusText.textContent = 'Synthetic Emulator Location Flagged';
-      el.geofenceBadge.className = 'step-badge fail';
-      el.geofenceBadge.textContent = 'FLAGGED';
-
-      el.mockgpsCard.className = 'step-card failed';
-      el.mockgpsStatusText.textContent = 'XXII-Sentinel Blocked Mock GPS Emulator';
-      el.mockgpsBadge.className = 'step-badge fail';
-      el.mockgpsBadge.textContent = '98.9% FRAUD';
-
-      el.dualGeofenceLine.textContent = '✕ Fraud Alert: Mock GPS Emulator Blocked';
-      el.dualGeofenceLine.style.color = '#f87171';
-
-      refreshCorperPass();
-    });
+        updateClearanceStatusUI();
+        refreshCorperPass();
+      });
+    }
 
     // Multi-Sector Switcher (NYSC / University / Security Patrol)
     if (el.selectSectorMode) {
@@ -1577,69 +1638,83 @@
 
   function initModals() {
     // Selfie Liveness Modal with Live Front Camera attempt
-    el.btnReverifySelfie.addEventListener('click', async () => {
-      el.modalSelfie.classList.add('active-modal');
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-          STATE.activeSelfieStream = stream;
-          if (el.selfieVideo && el.selfieMockImg) {
-            el.selfieVideo.srcObject = stream;
-            el.selfieVideo.style.display = 'block';
-            el.selfieMockImg.style.display = 'none';
-          }
-          if (el.selfieLivenessPrompt) {
-            el.selfieLivenessPrompt.textContent = 'Live Front Camera Active — Blink to verify presence';
-          }
-        } catch {
-          if (el.selfieLivenessPrompt) {
-            el.selfieLivenessPrompt.textContent = 'Analyzing 3D facial landmarks...';
+    if (el.btnReverifySelfie) {
+      el.btnReverifySelfie.addEventListener('click', async () => {
+        el.modalSelfie.classList.add('active-modal');
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            STATE.activeSelfieStream = stream;
+            if (el.selfieVideo && el.selfieMockImg) {
+              el.selfieVideo.srcObject = stream;
+              el.selfieVideo.style.display = 'block';
+              el.selfieMockImg.style.display = 'none';
+            }
+            if (el.selfieLivenessPrompt) {
+              el.selfieLivenessPrompt.textContent = 'Live Front Camera Active — Blink to verify presence';
+            }
+          } catch {
+            if (el.selfieLivenessPrompt) {
+              el.selfieLivenessPrompt.textContent = 'Analyzing 3D facial landmarks...';
+            }
           }
         }
-      }
-    });
+      });
+    }
 
-    el.btnCloseSelfieModal.addEventListener('click', () => {
-      stopSelfieStream();
-      el.modalSelfie.classList.remove('active-modal');
-    });
+    if (el.btnCloseSelfieModal) {
+      el.btnCloseSelfieModal.addEventListener('click', () => {
+        stopSelfieStream();
+        el.modalSelfie.classList.remove('active-modal');
+      });
+    }
 
-    el.btnCaptureSelfie.addEventListener('click', () => {
-      stopSelfieStream();
-      el.modalSelfie.classList.remove('active-modal');
-      el.livenessStatusText.textContent = 'Passive match 99.4% • Freshly Verified';
-      playVerificationChime(true);
-      refreshCorperPass();
-    });
+    if (el.btnCaptureSelfie) {
+      el.btnCaptureSelfie.addEventListener('click', () => {
+        stopSelfieStream();
+        el.modalSelfie.classList.remove('active-modal');
+        if (el.livenessStatusText) el.livenessStatusText.textContent = 'Passive match 99.4% • Freshly Verified';
+        playVerificationChime(true);
+        refreshCorperPass();
+      });
+    }
 
     // Station Screen Scan Modal (Route B)
-    el.btnScanStationScreen.addEventListener('click', () => {
-      el.modalStationScanner.classList.add('active-modal');
-    });
-    el.btnCloseStationModal.addEventListener('click', () => {
-      el.modalStationScanner.classList.remove('active-modal');
-    });
-    el.btnConfirmStationToken.addEventListener('click', () => {
-      el.modalStationScanner.classList.remove('active-modal');
-      const station = LGA_STATIONS[STATE.activeLgaCode] || LGA_STATIONS.IKJ;
-      playVerificationChime(true);
-      el.geofenceStatusText.textContent = `Walkthrough Check-in Approved via ${station.code} Master Beacon!`;
-      el.geofenceCard.className = 'step-card verified';
-
-      STATE.clearedCount++;
-      el.statClearedCount.textContent = STATE.clearedCount.toLocaleString();
-      STATE.manifestLog.unshift({
-        time: getFormattedTimeWAT(),
-        name: STATE.corper.name,
-        stateCode: STATE.corper.stateCode,
-        callUpNumber: STATE.corper.callUpNumber,
-        lgaName: station.name,
-        syncMode: 'ROUTE-B BEACON',
-        tokenSig: `0x${stationMasterToken.slice(0, 10)}`,
-        status: 'CLEARED'
+    if (el.btnScanStationScreen) {
+      el.btnScanStationScreen.addEventListener('click', () => {
+        el.modalStationScanner.classList.add('active-modal');
       });
-      renderManifestTable();
-    });
+    }
+    if (el.btnCloseStationModal) {
+      el.btnCloseStationModal.addEventListener('click', () => {
+        el.modalStationScanner.classList.remove('active-modal');
+      });
+    }
+    if (el.btnConfirmStationToken) {
+      el.btnConfirmStationToken.addEventListener('click', () => {
+        el.modalStationScanner.classList.remove('active-modal');
+        const station = LGA_STATIONS[STATE.activeLgaCode] || LGA_STATIONS.IKJ;
+        playVerificationChime(true);
+        if (el.geofenceStatusText) {
+          el.geofenceStatusText.textContent = `Walkthrough Check-in Approved via ${station.code} Master Beacon!`;
+        }
+        if (el.geofenceCard) el.geofenceCard.className = 'step-card verified';
+
+        STATE.clearedCount++;
+        el.statClearedCount.textContent = STATE.clearedCount.toLocaleString();
+        STATE.manifestLog.unshift({
+          time: getFormattedTimeWAT(),
+          name: STATE.corper.name,
+          stateCode: STATE.corper.stateCode,
+          callUpNumber: STATE.corper.callUpNumber,
+          lgaName: station.name,
+          syncMode: 'ROUTE-B BEACON',
+          tokenSig: `0x${stationMasterToken.slice(0, 10)}`,
+          status: 'CLEARED'
+        });
+        renderManifestTable();
+      });
+    }
 
     // Monthly Clearance Slip Receipt Modal
     if (el.btnOpenClearanceSlip) {

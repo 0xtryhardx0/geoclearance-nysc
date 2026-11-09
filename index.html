@@ -72,20 +72,17 @@
           </div>
 
           <div class="phone-screen">
-            <!-- Smart Slot & Queue Decongestion AI Banner -->
-            <div id="smart-slot-banner" style="background: linear-gradient(90deg, rgba(0, 135, 68, 0.28), rgba(16, 185, 129, 0.12)); border: 1px solid rgba(52, 211, 153, 0.35); border-radius: 8px; padding: 0.45rem 0.65rem; margin-bottom: 0.55rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem;">
-              <div>
-                <strong style="color: #34d399;" id="smart-slot-title">🧠 Smart Queue AI: LOW CROWD</strong>
-                <div style="color: var(--text-secondary); font-size: 0.66rem;" id="smart-slot-sub">Window: 08:30–09:00 AM • Est. Wait: ~2 mins</div>
-              </div>
-              <span class="step-badge" id="smart-slot-badge" style="font-size: 0.62rem;">SLOT OPEN</span>
+            <!-- App Header Bar -->
+            <div class="phone-app-bar">
+              <span class="app-bar-brand" id="phone-app-brand">🇳🇬 NYSC MOBILE PASS</span>
+              <span class="app-bar-month">NOV 2026</span>
             </div>
 
             <!-- Corper Profile Card -->
             <div class="corper-id-card">
               <div class="corper-avatar-box">
                 <img src="assets/corper_passport.jpg" alt="Corps Member Passport" class="corper-photo" id="corper-photo-img">
-                <div class="liveness-check-badge" title="Passive Telemetry Verified">✓</div>
+                <div class="liveness-check-badge" title="Official Profile Synced">✓</div>
               </div>
               <div class="corper-meta">
                 <h3 id="corper-name-display">ADELEKE OLUWASEUN</h3>
@@ -95,42 +92,12 @@
               </div>
             </div>
 
-            <!-- Verification Stepper Status Cards -->
-            <div class="verification-stepper">
-              <!-- Step 1: Geofence Verification -->
-              <div class="step-card verified" id="step-geofence-card">
-                <div class="step-info">
-                  <div class="step-icon">📍</div>
-                  <div class="step-titles">
-                    <h4 id="geofence-zone-title">Geofence: Ikeja Secretariat</h4>
-                    <p id="geofence-status-text">18 meters from Secretariat • In Zone</p>
-                  </div>
-                </div>
-                <span class="step-badge" id="geofence-badge">VERIFIED</span>
-              </div>
-
-              <!-- Step 2: XXII-Sentinel Velocity & Anti-Mock GPS Guard -->
-              <div class="step-card verified" id="step-mockgps-card">
-                <div class="step-info">
-                  <div class="step-icon">🧠</div>
-                  <div class="step-titles">
-                    <h4 id="sentinel-card-title">XXII-Sentinel Anti-Spoof AI</h4>
-                    <p id="mockgps-status-text">Physical Telemetry Verified • Zero Spoof</p>
-                  </div>
-                </div>
-                <span class="step-badge" id="mockgps-badge">0.02% RISK</span>
-              </div>
-
-              <!-- Step 3: Zero-Stress Passive Liveness / Buddy-Assist -->
-              <div class="step-card verified" id="step-liveness-card">
-                <div class="step-info">
-                  <div class="step-icon">👤</div>
-                  <div class="step-titles">
-                    <h4 id="liveness-card-title">Zero-Friction Presence Check</h4>
-                    <p id="liveness-status-text">Passive Biometric Match 99.4% (Zero Bounceback)</p>
-                  </div>
-                </div>
-                <button type="button" class="btn-ctrl" id="btn-reverify-selfie" style="padding: 0.35rem 0.6rem;">Camera</button>
+            <!-- Single Clean Clearance Status Banner -->
+            <div class="clearance-status-banner in-zone" id="clearance-status-banner">
+              <div class="status-indicator-dot" id="status-indicator-dot"></div>
+              <div class="status-banner-content">
+                <strong id="status-banner-title">📍 Inside Clearance Zone</strong>
+                <span id="status-banner-sub">Ikeja LGA Secretariat • Verified Present</span>
               </div>
             </div>
 
@@ -138,7 +105,7 @@
             <div class="qr-pass-card" id="dynamic-pass-container">
               <div class="pass-header">
                 <span class="pass-title">MONTHLY CLEARANCE PASS</span>
-                <span style="font-size: 0.72rem; color: #a7f3d0; font-weight: 700;">NOV 2026</span>
+                <span class="pass-valid-tag" id="pass-valid-tag">READY FOR SCAN</span>
               </div>
 
               <!-- Canvas QR with Watermark -->
@@ -155,37 +122,29 @@
                 <span id="qr-refresh-timer">Pass refreshes in 28s</span>
               </div>
 
-              <div class="token-hash" id="token-signature-hash">
-                TOKEN: XXII-0x4f8e...92cb (PROPRIETARY)
-              </div>
+              <p class="pass-instruction" id="pass-instruction-text">
+                Show this QR pass to the NYSC Inspector at the clearance desk.
+              </p>
             </div>
 
-            <!-- Route B Alternative Action & Clearance Slip -->
-            <div class="walkthrough-scan-box" style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.2rem;">
-                Walking past the LGI Master Screen or need your monthly receipt?
-              </p>
-              <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                <button type="button" class="btn-gold" id="btn-scan-station-screen" style="font-size: 0.78rem; padding: 0.55rem 0.9rem;">
-                  📷 Scan Secretariat Screen
-                </button>
-                <button type="button" class="btn-ctrl" id="btn-open-clearance-slip" style="flex-direction: row; padding: 0.55rem 0.9rem; font-size: 0.78rem;">
-                  📄 Clearance Slip
-                </button>
-              </div>
-            </div>
+            <!-- Clean Action Button: Download Signed Clearance Certificate -->
+            <button type="button" class="btn-primary" id="btn-open-clearance-slip" style="justify-content: center; width: 100%; padding: 0.8rem; font-size: 0.85rem; font-weight: 700;">
+              📄 View / Download Clearance Certificate
+            </button>
           </div>
         </div>
 
         <!-- Testing Simulation Dock -->
         <aside class="simulation-dock">
-          <!-- Multi-Corper & LGA Secretariat Selector Card -->
+          <!-- Sidmach Pre-Loaded Profiles -->
           <div class="dock-card">
-            <h3>👥 Active Corps Member & LGA Station</h3>
-            <p>Switch between enrolled Corps Members and NYSC LGA Secretariats across Nigeria, or enroll a custom Corper.</p>
+            <h3>👥 Synced NYSC Portal Profiles</h3>
+            <p style="color: var(--nysc-gold-light); font-size: 0.74rem; margin-bottom: 0.6rem;">
+              🔒 Direct Sidmach Sync: 400,000 active Corps Members pre-loaded from portal.nysc.org.ng. No manual enrollment required.
+            </p>
             <div style="display: flex; flex-direction: column; gap: 0.65rem;">
               <div>
-                <label for="select-active-lga" style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">NYSC LGA Secretariat Station</label>
+                <label for="select-active-lga" style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Active LGA Secretariat Station</label>
                 <select id="select-active-lga" class="select-input">
                   <option value="IKJ">Ikeja LGA Secretariat — Lagos State (6.5965°N, 3.3421°E)</option>
                   <option value="AMC">Abuja Municipal (AMAC) Secretariat — FCT (9.0579°N, 7.4951°E)</option>
@@ -197,7 +156,7 @@
               </div>
 
               <div>
-                <label for="select-active-corper" style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Active Corps Member Profile</label>
+                <label for="select-active-corper" style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Select Synced Corps Member</label>
                 <select id="select-active-corper" class="select-input">
                   <option value="0">LA/24B/4819 — ADELEKE OLUWASEUN (ICT &amp; Digital Skills)</option>
                   <option value="1">FC/24C/1092 — IBRAHIM ZAINAB AMINA (Editorial &amp; Publicity)</option>
@@ -207,20 +166,12 @@
                   <option value="5">KN/24B/2188 — MUSA ABDULLAHI SANI (Agro-Allied &amp; SDGs)</option>
                 </select>
               </div>
-
-              <div class="roster-form-grid">
-                <input type="text" id="input-custom-name" class="input-field" placeholder="Full Name (e.g. OBI CHINEDU)" maxlength="48">
-                <input type="text" id="input-custom-statecode" class="input-field" placeholder="State Code (e.g. LA/25A/1204)" maxlength="16">
-              </div>
-              <button type="button" class="btn-ctrl" id="btn-enroll-custom-corper" style="flex-direction: row; justify-content: center; padding: 0.55rem;">
-                ➕ Quick-Enroll &amp; Switch to Corps Member
-              </button>
             </div>
           </div>
 
           <div class="dock-card">
-            <h3>🎛️ Location, XXII-Sentinel AI &amp; Buddy-Assist Simulator</h3>
-            <p>Test how GeoClearance handles dead batteries leniently while catching Fake GPS &amp; remote spoofing.</p>
+            <h3>🎛️ Location &amp; Anti-Fraud Simulator</h3>
+            <p>Test how GeoClearance handles real Nigerian field scenarios in real time.</p>
             <div class="control-buttons-grid">
               <button type="button" class="btn-ctrl active-ctrl" id="sim-loc-secretariat">
                 <strong>📍 At Secretariat</strong>
@@ -254,7 +205,7 @@
             <ul style="font-size: 0.8rem; color: var(--text-secondary); margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem;">
               <li><strong>Zero-Bounceback Speed:</strong> Clears 3,000+ personnel in under 28 minutes (0.4s per verification) with zero external hardware cost.</li>
               <li><strong>Lenient Dead-Battery Workflow:</strong> Built-in <em>Buddy-Assist</em> and LGI Kiosk Lookup ensure personnel with dead phones are never stranded.</li>
-              <li><strong>XXII-Sentinel Anti-Fraud Core:</strong> Proprietary black-box AI engine neutralizes remote check-ins, proxy syndicates, and GPS emulators in real time.</li>
+              <li><strong>XXII-Sentinel Anti-Fraud Core:</strong> Proprietary AI engine neutralizes remote check-ins, proxy syndicates, and GPS emulators in real time.</li>
             </ul>
           </div>
         </aside>
