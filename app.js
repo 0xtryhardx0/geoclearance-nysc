@@ -203,28 +203,108 @@
     ]
   };
 
-  // --- 4. Minimalist Standard QR Code Matrix Generator (Zero-Dependency) ---
+  // --- 4. ISO/IEC 18004 Standards-Compliant QR Code Generator (Scannable by iOS/Android Cameras) ---
   class CompactQR {
+    static getVersionSpec(byteLen) {
+      // ISO/IEC 18004 Error Correction Level L (Single-block versions 1..5, up to 106 bytes)
+      const specs = [
+        { ver: 1, size: 21, dataBytes: 19, ecBytes: 7, align: [] },
+        { ver: 2, size: 25, dataBytes: 34, ecBytes: 10, align: [6, 18] },
+        { ver: 3, size: 29, dataBytes: 55, ecBytes: 15, align: [6, 22] },
+        { ver: 4, size: 33, dataBytes: 80, ecBytes: 20, align: [6, 26] },
+        { ver: 5, size: 37, dataBytes: 108, ecBytes: 26, align: [6, 30] }
+      ];
+      for (const s of specs) {
+        if (byteLen + 2 <= s.dataBytes) return s;
+      }
+      return specs[specs.length - 1];
+    }
+
+    static computeReedSolomon(data, ecLen) {
+      const exp = new Uint8Array(512);
+      const log = new Uint8Array(256);
+      let x = 1;
+      for (let i = 0; i < 255; i++) {
+        exp[i] = x;
+        log[x] = i;
+        x <<= 1;
+        if (x & 0x100) x ^= 0x11d;
+      }
+      for (let i = 255; i < 512; i++) exp[i] = exp[i - 255];
+
+      const gfMul = (a, b) => (a === 0 || b === 0) ? 0 : exp[log[a] + log[b]];
+
+      let gen = new Uint8Array([1]);
+      for (let i = 0; i < ecLen; i++) {
+        const next = new Uint8Array(gen.length + 1);
+        const factor = exp[i];
+        for (let j = 0; j < gen.length; j++) {
+          next[j] ^= gen[j];
+          next[j + 1] ^= gfMul(gen[j], factor);
+        }
+        gen = next;
+      }
+
+      const msg = new Uint8Array(data.length + ecLen);
+      msg.set(data, 0);
+      for (let i = 0; i < data.length; i++) {
+        const coef = msg[i];
+        if (coef !== 0) {
+          for (let j = 1; j < gen.length; j++) {
+            msg[i + j] ^= gfMul(gen[j], coef);
+          }
+        }
+      }
+      return msg.slice(data.length);
+    }
+
     static generateMatrix(text) {
-      const size = 25;
+      const utf8 = Array.from(new TextEncoder().encode(text));
+      const spec = CompactQR.getVersionSpec(utf8.length);
+      const payload = utf8.slice(0, spec.dataBytes - 2);
+
+      // Build Byte-mode bit stream (0100 + 8-bit length + payload + terminator + pad bytes)
+      const bits = [];
+      const pushBits = (val, len) => {
+        for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1);
+      };
+      pushBits(0b0100, 4);
+      pushBits(payload.length, 8);
+      for (const b of payload) pushBits(b, 8);
+
+      const maxBits = spec.dataBytes * 8;
+      const termLen = Math.min(4, maxBits - bits.length);
+      pushBits(0, termLen);
+      while (bits.length % 8 !== 0) bits.push(0);
+
+      const dataCodewords = new Uint8Array(spec.dataBytes);
+      for (let i = 0; i < bits.length / 8; i++) {
+        let byteVal = 0;
+        for (let b = 0; b < 8; b++) byteVal = (byteVal << 1) | bits[i * 8 + b];
+        dataCodewords[i] = byteVal;
+      }
+      const padBytes = [0xec, 0x11];
+      for (let i = bits.length / 8, p = 0; i < spec.dataBytes; i++, p++) {
+        dataCodewords[i] = padBytes[p % 2];
+      }
+
+      const ecCodewords = CompactQR.computeReedSolomon(dataCodewords, spec.ecBytes);
+      const allCodewords = new Uint8Array(spec.dataBytes + spec.ecBytes);
+      allCodewords.set(dataCodewords, 0);
+      allCodewords.set(ecCodewords, spec.dataBytes);
+
+      const size = spec.size;
       const matrix = Array.from({ length: size }, () => Array(size).fill(0));
       const reserved = Array.from({ length: size }, () => Array(size).fill(false));
 
       const placeFinder = (r0, c0) => {
-        for (let r = 0; r < 7; r++) {
-          for (let c = 0; c < 7; c++) {
-            const isBorder = (r === 0 || r === 6 || c === 0 || c === 6);
-            const isInner = (r >= 2 && r <= 4 && c >= 2 && c <= 4);
-            matrix[r0 + r][c0 + c] = (isBorder || isInner) ? 1 : 0;
-            reserved[r0 + r][c0 + c] = true;
-          }
-        }
         for (let r = -1; r <= 7; r++) {
           for (let c = -1; c <= 7; c++) {
-            const pr = r0 + r;
-            const pc = c0 + c;
-            if (pr >= 0 && pr < size && pc >= 0 && pc < size && !reserved[pr][pc]) {
-              matrix[pr][pc] = 0;
+            const pr = r0 + r, pc = c0 + c;
+            if (pr >= 0 && pr < size && pc >= 0 && pc < size) {
+              const inFinder = (r >= 0 && r <= 6 && c >= 0 && c <= 6);
+              const isDark = inFinder && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+              matrix[pr][pc] = isDark ? 1 : 0;
               reserved[pr][pc] = true;
             }
           }
@@ -235,16 +315,24 @@
       placeFinder(0, size - 7);
       placeFinder(size - 7, 0);
 
-      const ar = 16, ac = 16;
-      for (let r = -2; r <= 2; r++) {
-        for (let c = -2; c <= 2; c++) {
-          const isEdge = Math.max(Math.abs(r), Math.abs(c)) === 2;
-          const isCenter = (r === 0 && c === 0);
-          matrix[ar + r][ac + c] = (isEdge || isCenter) ? 1 : 0;
-          reserved[ar + r][ac + c] = true;
+      // Alignment patterns
+      if (spec.align.length > 0) {
+        for (const ar of spec.align) {
+          for (const ac of spec.align) {
+            if (reserved[ar][ac]) continue;
+            for (let r = -2; r <= 2; r++) {
+              for (let c = -2; c <= 2; c++) {
+                const isEdge = Math.max(Math.abs(r), Math.abs(c)) === 2;
+                const isCenter = (r === 0 && c === 0);
+                matrix[ar + r][ac + c] = (isEdge || isCenter) ? 1 : 0;
+                reserved[ar + r][ac + c] = true;
+              }
+            }
+          }
         }
       }
 
+      // Timing patterns
       for (let i = 8; i < size - 8; i++) {
         if (!reserved[6][i]) {
           matrix[6][i] = (i % 2 === 0) ? 1 : 0;
@@ -256,28 +344,65 @@
         }
       }
 
-      let hash = 0;
-      for (let i = 0; i < text.length; i++) {
-        hash = ((hash << 5) - hash) + text.charCodeAt(i);
-        hash |= 0;
+      // Reserve Format Info areas & set Dark Module
+      for (let i = 0; i < 9; i++) {
+        if (i !== 6) {
+          reserved[8][i] = true;
+          reserved[i][8] = true;
+        }
       }
+      for (let i = 0; i < 8; i++) {
+        reserved[8][size - 1 - i] = true;
+        reserved[size - 1 - i][8] = true;
+      }
+      matrix[size - 8][8] = 1;
+      reserved[size - 8][8] = true;
 
-      let bitPos = 0;
-      for (let col = size - 1; col > 0; col -= 2) {
-        if (col === 6) col--;
-        for (let row = 0; row < size; row++) {
-          for (let c = 0; c < 2; c++) {
-            const r = (col % 4 === 0) ? (size - 1 - row) : row;
-            const targetCol = col - c;
-            if (!reserved[r][targetCol]) {
-              const charIdx = (bitPos >> 3) % text.length;
-              const bit = (text.charCodeAt(charIdx) >> (bitPos % 8)) & 1;
-              const pseudoBit = ((hash ^ (r * 31 + targetCol * 17) ^ (bitPos * 7)) & 1);
-              matrix[r][targetCol] = (bit ^ pseudoBit) ? 1 : 0;
-              bitPos++;
+      // Place data & EC bits with Mask 0 ((r + c) % 2 === 0)
+      const totalBits = allCodewords.length * 8;
+      let bitIdx = 0;
+      let upward = true;
+
+      for (let rightCol = size - 1; rightCol > 0; rightCol -= 2) {
+        if (rightCol === 6) rightCol = 5;
+        for (let step = 0; step < size; step++) {
+          const r = upward ? (size - 1 - step) : step;
+          for (let dc = 0; dc < 2; dc++) {
+            const c = rightCol - dc;
+            if (!reserved[r][c]) {
+              let bit = 0;
+              if (bitIdx < totalBits) {
+                const cw = allCodewords[bitIdx >> 3];
+                bit = (cw >> (7 - (bitIdx & 7))) & 1;
+                bitIdx++;
+              }
+              const maskBit = ((r + c) % 2 === 0) ? 1 : 0;
+              matrix[r][c] = bit ^ maskBit;
             }
           }
         }
+        upward = !upward;
+      }
+
+      // Write Format Information for Level L (01) + Mask 0 (000) -> 0x77c4
+      const formatBits = 0x77c4;
+      const topLeftRowCols = [0, 1, 2, 3, 4, 5, 7, 8];
+      for (let k = 0; k < 8; k++) {
+        const bit = (formatBits >> (14 - k)) & 1;
+        matrix[8][topLeftRowCols[k]] = bit;
+      }
+      const topLeftColRows = [7, 5, 4, 3, 2, 1, 0];
+      for (let k = 0; k < 7; k++) {
+        const bit = (formatBits >> (6 - k)) & 1;
+        matrix[topLeftColRows[k]][8] = bit;
+      }
+      for (let k = 0; k < 7; k++) {
+        const bit = (formatBits >> (14 - k)) & 1;
+        matrix[size - 1 - k][8] = bit;
+      }
+      for (let k = 0; k < 8; k++) {
+        const bit = (formatBits >> (7 - k)) & 1;
+        matrix[8][size - 8 + k] = bit;
       }
 
       return matrix;
@@ -286,8 +411,10 @@
     static drawToCanvas(canvas, matrix, darkColor = '#005a2b', lightColor = '#ffffff') {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
+      const quietZone = 3;
       const size = matrix.length;
-      const cellSize = canvas.width / size;
+      const totalModules = size + quietZone * 2;
+      const cellSize = canvas.width / totalModules;
 
       ctx.fillStyle = lightColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -296,7 +423,12 @@
       for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
           if (matrix[r][c] === 1) {
-            ctx.fillRect(c * cellSize, r * cellSize, cellSize + 0.5, cellSize + 0.5);
+            ctx.fillRect(
+              (c + quietZone) * cellSize,
+              (r + quietZone) * cellSize,
+              Math.ceil(cellSize),
+              Math.ceil(cellSize)
+            );
           }
         }
       }
@@ -655,17 +787,20 @@
 
     el.tokenSignatureHash.textContent = `TOKEN: XXII-${hash.slice(0, 8)}...${hash.slice(-6)} (PROPRIETARY)`;
 
+    const baseUrl = 'https://0xtryhardx0.github.io/geoclearance-nysc/';
+    const scanUrl = `${baseUrl}?s=1&c=${STATE.activeCorperIndex}&l=${STATE.activeLgaCode}&m=${STATE.locationStatus}`;
+
     const isZoneValid = (STATE.locationStatus === 'secretariat' || STATE.locationStatus === 'realgps');
     if (isZoneValid) {
-      const matrix = CompactQR.generateMatrix(`GEO-NYSC-CLEARANCE:${STATE.corper.stateCode}:${STATE.activeLgaCode}:${hash}`);
+      const matrix = CompactQR.generateMatrix(scanUrl);
       CompactQR.drawToCanvas(el.corperQrCanvas, matrix, '#005a2b', '#ffffff');
       CompactQR.drawToCanvas(el.dualCorperQrCanvas, matrix, '#005a2b', '#ffffff');
     } else if (STATE.locationStatus === 'buddy') {
-      const buddyMatrix = CompactQR.generateMatrix(`BUDDY-ASSIST:${STATE.corper.stateCode}:${STATE.activeLgaCode}:${hash}`);
+      const buddyMatrix = CompactQR.generateMatrix(scanUrl);
       CompactQR.drawToCanvas(el.corperQrCanvas, buddyMatrix, '#b45309', '#fef3c7');
       CompactQR.drawToCanvas(el.dualCorperQrCanvas, buddyMatrix, '#b45309', '#fef3c7');
     } else {
-      const invalidMatrix = CompactQR.generateMatrix(`REVOKED:${STATE.locationStatus}`);
+      const invalidMatrix = CompactQR.generateMatrix(scanUrl);
       CompactQR.drawToCanvas(el.corperQrCanvas, invalidMatrix, '#ef4444', '#fee2e2');
       CompactQR.drawToCanvas(el.dualCorperQrCanvas, invalidMatrix, '#ef4444', '#fee2e2');
     }
@@ -703,7 +838,9 @@
     const hash = await generateTokenHash(payload);
     stationMasterToken = hash.slice(0, 16);
 
-    const matrix = CompactQR.generateMatrix(`NYSC-STATION-BEACON:${STATE.activeLgaCode}:${stationMasterToken}`);
+    const baseUrl = 'https://0xtryhardx0.github.io/geoclearance-nysc/';
+    const beaconUrl = `${baseUrl}?s=2&l=${STATE.activeLgaCode}&t=${stationMasterToken.slice(0, 6)}`;
+    const matrix = CompactQR.generateMatrix(beaconUrl);
     CompactQR.drawToCanvas(el.stationMasterQrCanvas, matrix, '#008744', '#ffffff');
   }
 
@@ -1490,7 +1627,50 @@
     }
   }
 
-  // --- 20. Initialization Entrypoint ---
+  // --- 20. Mobile Camera QR Scan URL Handler & Initialization Entrypoint ---
+  function handleMobileCameraScanParams() {
+    const params = new URLSearchParams(window.location.search);
+    const scanType = params.get('s');
+    if (!scanType) return;
+
+    const lgaParam = (params.get('l') || '').toUpperCase();
+    if (LGA_STATIONS[lgaParam]) {
+      STATE.activeLgaCode = lgaParam;
+      if (el.selectActiveLga) el.selectActiveLga.value = lgaParam;
+    }
+
+    const corperIdx = parseInt(params.get('c') || '0', 10);
+    if (!Number.isNaN(corperIdx) && CORPER_ROSTER[corperIdx]) {
+      STATE.activeCorperIndex = corperIdx;
+      STATE.corper = { ...CORPER_ROSTER[corperIdx], month: 'November 2026' };
+      if (el.selectActiveCorper) el.selectActiveCorper.value = String(corperIdx);
+    }
+
+    const modeParam = params.get('m') || 'secretariat';
+    const allowedModes = ['secretariat', 'buddy', 'realgps', 'home', 'velocity', 'fakegps'];
+    if (allowedModes.includes(modeParam)) {
+      STATE.locationStatus = modeParam;
+    }
+
+    syncActiveProfileToUI();
+
+    if (scanType === '1') {
+      // Phone scanned a Corper Dynamic Pass -> Switch directly to Inspector Verification View & run scan!
+      const inspectorTab = document.getElementById('tab-inspector-btn');
+      if (inspectorTab) inspectorTab.click();
+      setTimeout(() => {
+        performInspectorScan(false);
+        if (el.btnOpenClearanceSlip) el.btnOpenClearanceSlip.click();
+      }, 250);
+    } else if (scanType === '2') {
+      // Corper phone scanned the Secretariat Master Beacon -> Instant Walkthrough Clearance Receipt!
+      setTimeout(() => {
+        performInspectorScan(false);
+        if (el.btnOpenClearanceSlip) el.btnOpenClearanceSlip.click();
+      }, 250);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     startClock();
@@ -1502,6 +1682,7 @@
     renderManifestTable();
     startCorperTimer();
     startStationTimer();
+    handleMobileCameraScanParams();
   });
 
 })();
